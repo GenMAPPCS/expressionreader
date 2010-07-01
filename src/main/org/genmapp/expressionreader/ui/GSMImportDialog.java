@@ -13,10 +13,7 @@ import org.genmapp.expressionreader.data.SOFT;
 import org.genmapp.expressionreader.ExpressionReaderUtil;
 import org.genmapp.expressionreader.parser.SOFTParser;
 import org.genmapp.expressionreader.tasks.AbstractTask;
-import org.genmapp.expressionreader.tasks.GEOImportTask;
 import org.genmapp.expressionreader.tasks.SOFTDownloadTask;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -32,7 +29,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 
 /**

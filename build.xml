@@ -109,6 +109,7 @@
     <target name="clean" description="clean up">
 		<!-- Delete the ${build} and ${src} directory trees -->
         <delete dir="build" />
+        <delete file="${cytoscape.dir}/plugins/ExpressionReader.jar"/>
     </target>
 
 	<!--
