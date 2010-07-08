@@ -96,7 +96,6 @@ public class SOFTViewerPane extends javax.swing.JPanel {
 
             @Override
             public Object getValueAt(int rowIndex, int columnIndex) {
-                System.out.println(rowIndex + ", " + columnIndex);
                 return dt.getData().get(keys.get(rowIndex)).get(columnIndex);
             }
 

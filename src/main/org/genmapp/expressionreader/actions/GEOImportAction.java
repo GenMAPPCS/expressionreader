@@ -12,6 +12,7 @@ import cytoscape.task.util.TaskManager;
 import cytoscape.util.CytoscapeAction;
 import org.genmapp.expressionreader.data.SOFT.Format;
 import org.genmapp.expressionreader.tasks.SOFTDownloadTask;
+import org.genmapp.expressionreader.ui.GDSViewerDialog;
 import org.genmapp.expressionreader.ui.GSEViewerDialog;
 import org.genmapp.expressionreader.ui.GSMImportDialog;
 import org.genmapp.expressionreader.ui.SOFTViewer;
@@ -40,15 +41,16 @@ public class GEOImportAction extends CytoscapeAction implements SOFTViewer {
     }
 
     public void viewSOFT(SOFT soft) {
-        System.out.println(soft);
         if (soft.getType() == SOFT.Type.GSM) {
             GSMImportDialog dialog = new GSMImportDialog(Cytoscape.getDesktop(), true, soft);
             dialog.setVisible(true);
         } else if (soft.getType() == SOFT.Type.GSE) {
             GSEViewerDialog dialog = new GSEViewerDialog(Cytoscape.getDesktop(), true, soft);
             dialog.setVisible(true);
-        } else {
-            JOptionPane.showMessageDialog(Cytoscape.getDesktop(), "Only supports GSM and GSE");
+        } else if (soft.getType() == SOFT.Type.GDS) {
+            GDSViewerDialog dialog = new GDSViewerDialog(Cytoscape.getDesktop(), true);
+            dialog.setSOFT(soft);
+            dialog.setVisible(true);
         }
     }
 

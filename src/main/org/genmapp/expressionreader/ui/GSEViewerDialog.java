@@ -51,7 +51,7 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
         java.awt.GridBagConstraints gridBagConstraints;
 
         contentSplitPane = new javax.swing.JSplitPane();
-        htmlViewerTabbedPane = new javax.swing.JTabbedPane();
+        sampleTabbedPane = new javax.swing.JTabbedPane();
         leftPane = new javax.swing.JSplitPane();
         gsmContentTabbedPane = new javax.swing.JTabbedPane();
         samplePane = new javax.swing.JPanel();
@@ -65,6 +65,7 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
         platformScrollPane = new javax.swing.JScrollPane();
         platformList = new javax.swing.JList();
         platformButtonPane = new javax.swing.JPanel();
+        gplViewBtn = new javax.swing.JButton();
         groupsPane = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jList1 = new javax.swing.JList();
@@ -83,8 +84,8 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(500, 400));
 
-        htmlViewerTabbedPane.setPreferredSize(new java.awt.Dimension(250, 500));
-        contentSplitPane.setRightComponent(htmlViewerTabbedPane);
+        sampleTabbedPane.setPreferredSize(new java.awt.Dimension(250, 500));
+        contentSplitPane.setRightComponent(sampleTabbedPane);
 
         leftPane.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
 
@@ -149,6 +150,15 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
         platformScrollPane.setViewportView(platformList);
 
         platformPane.add(platformScrollPane, java.awt.BorderLayout.CENTER);
+
+        gplViewBtn.setText("  View  ");
+        gplViewBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                gplViewBtnActionPerformed(evt);
+            }
+        });
+        platformButtonPane.add(gplViewBtn);
+
         platformPane.add(platformButtonPane, java.awt.BorderLayout.PAGE_END);
 
         gsmContentTabbedPane.addTab("Platforms", platformPane);
@@ -268,13 +278,13 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
 
     private void viewBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewBtnActionPerformed
         String gsmId = (String)sampleList.getSelectedValue();
-        int index = htmlViewerTabbedPane.indexOfTab(gsmId);
+        int index = sampleTabbedPane.indexOfTab(gsmId);
         if (index < 0) { // create a new tab and add to it
             SOFTDownloadTask task = new SOFTDownloadTask(gsmId, this, SOFT.Format.quick);
             JTaskConfig config = task.getDefaultTaskConfig();
             boolean success = TaskManager.executeTask(task, config);
         } else { // bring the tab into focus
-            htmlViewerTabbedPane.setSelectedIndex(index);
+            sampleTabbedPane.setSelectedIndex(index);
         }
 
     }//GEN-LAST:event_viewBtnActionPerformed
@@ -301,6 +311,18 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
             TaskManager.executeTask(task, task.getDefaultTaskConfig());
         }
     }//GEN-LAST:event_importSampleBtnActionPerformed
+
+    private void gplViewBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_gplViewBtnActionPerformed
+        String gplId = (String) platformList.getSelectedValue();
+        int index = sampleTabbedPane.indexOfTab(gplId);
+        if (index < 0) { // create a new tab and add to it
+            SOFTDownloadTask task = new SOFTDownloadTask(gplId, this, SOFT.Format.quick);
+            JTaskConfig config = task.getDefaultTaskConfig();
+            boolean success = TaskManager.executeTask(task, config);
+        } else { // bring the tab into focus
+            sampleTabbedPane.setSelectedIndex(index);
+        }
+    }//GEN-LAST:event_gplViewBtnActionPerformed
 
     /**
     * @param args the command line arguments
@@ -344,10 +366,10 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addToGruopBtn;
     private javax.swing.JSplitPane contentSplitPane;
+    private javax.swing.JButton gplViewBtn;
     private javax.swing.JPanel groupsPane;
     private javax.swing.JTabbedPane gsmContentTabbedPane;
     private javax.swing.JPanel gsmInfoPane;
-    private javax.swing.JTabbedPane htmlViewerTabbedPane;
     private javax.swing.JButton importGroupBtn;
     private javax.swing.JButton importSampleBtn;
     private javax.swing.JList jList1;
@@ -367,6 +389,7 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
     private javax.swing.JList sampleList;
     private javax.swing.JPanel samplePane;
     private javax.swing.JScrollPane sampleScrollPane;
+    private javax.swing.JTabbedPane sampleTabbedPane;
     private javax.swing.JButton viewBtn;
     private javax.swing.JButton viewGroupBtn;
     private javax.swing.JButton viewInBroswerBtn;
@@ -377,11 +400,11 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
         SOFTViewerPane pane = new SOFTViewerPane();
         pane.setOwner(this);
         pane.setSoft(soft);
-        htmlViewerTabbedPane.add(soft.getId(), pane);
-        htmlViewerTabbedPane.setSelectedComponent(pane);
+        sampleTabbedPane.add(soft.getId(), pane);
+        sampleTabbedPane.setSelectedComponent(pane);
     }
 
     public void closeView(SOFT soft) {
-        htmlViewerTabbedPane.remove(htmlViewerTabbedPane.indexOfTab(soft.getId()));
+        sampleTabbedPane.remove(sampleTabbedPane.indexOfTab(soft.getId()));
     }
 }

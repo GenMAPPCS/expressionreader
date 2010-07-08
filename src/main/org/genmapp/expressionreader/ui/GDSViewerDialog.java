@@ -11,20 +11,16 @@
 
 package org.genmapp.expressionreader.ui;
 
-import java.io.InputStream;
-import java.net.URL;
 import java.util.List;
-import java.util.zip.GZIPInputStream;
 import org.genmapp.expressionreader.ExpressionReaderUtil;
 import org.genmapp.expressionreader.data.GDS;
 import org.genmapp.expressionreader.data.SOFT;
-import org.genmapp.expressionreader.parser.SOFTParser;
 
 /**
  *
  * @author djiao
  */
-public class GDSViewerDialog extends javax.swing.JDialog {
+public class GDSViewerDialog extends javax.swing.JDialog implements SOFTViewer {
 
     private GDS gds;
 
@@ -88,6 +84,7 @@ public class GDSViewerDialog extends javax.swing.JDialog {
     public void setSOFT(SOFT soft) {
         if (soft.getType() == SOFT.Type.GDS) {
             this.gds = (GDS)soft;
+            this.softViewerPane.setOwner(this);
             this.softViewerPane.setSoft(soft);
 
             List<SOFT> subsets = gds.getSubsets();
@@ -99,5 +96,13 @@ public class GDSViewerDialog extends javax.swing.JDialog {
         } else {
             throw new RuntimeException("Wrong SOFT type");
         }
+    }
+
+    public void viewSOFT(SOFT soft) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void closeView(SOFT soft) {
+        this.dispose();
     }
 }

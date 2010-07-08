@@ -11,19 +11,15 @@
 
 package org.genmapp.expressionreader.ui;
 
+import cytoscape.Cytoscape;
 import cytoscape.task.ui.JTaskConfig;
 import cytoscape.task.util.TaskManager;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.List;
 import java.util.Map;
-import java.util.zip.GZIPInputStream;
 import javax.swing.DefaultListModel;
 import javax.swing.JDialog;
 import org.genmapp.expressionreader.ExpressionReaderUtil;
 import org.genmapp.expressionreader.data.GDS;
 import org.genmapp.expressionreader.data.SOFT;
-import org.genmapp.expressionreader.parser.SOFTParser;
 import org.genmapp.expressionreader.tasks.SOFTDownloadTask;
 
 /**
@@ -51,6 +47,7 @@ public class GDSSubsetViewerPane extends javax.swing.JPanel implements SOFTViewe
         jPanel1 = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
         viewSampleBtn = new javax.swing.JButton();
+        importBtn = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         sampleList = new javax.swing.JList();
         jPanel3 = new javax.swing.JPanel();
@@ -71,13 +68,21 @@ public class GDSSubsetViewerPane extends javax.swing.JPanel implements SOFTViewe
 
         jPanel1.setLayout(new java.awt.BorderLayout());
 
-        viewSampleBtn.setText(" View ");
+        viewSampleBtn.setText("  View  ");
         viewSampleBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 viewSampleBtnActionPerformed(evt);
             }
         });
         jPanel2.add(viewSampleBtn);
+
+        importBtn.setText(" Import ");
+        importBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                importBtnActionPerformed(evt);
+            }
+        });
+        jPanel2.add(importBtn);
 
         jPanel1.add(jPanel2, java.awt.BorderLayout.SOUTH);
 
@@ -122,10 +127,29 @@ public class GDSSubsetViewerPane extends javax.swing.JPanel implements SOFTViewe
         }
     }//GEN-LAST:event_viewSampleBtnActionPerformed
 
+    private void importBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importBtnActionPerformed
+        String gsmId = (String) sampleList.getSelectedValue();
+        if (gsmId != null && !"".equals(gsmId)) {
+            SOFTDownloadTask task = new SOFTDownloadTask(gsmId, new SOFTViewer() {
+
+                public void viewSOFT(SOFT soft) {
+                    GSMImportDialog dialog = new GSMImportDialog(Cytoscape.getDesktop(), true, soft);
+                    dialog.setVisible(true);
+                }
+
+                public void closeView(SOFT soft) {
+                    // do nothing
+                }
+            }, SOFT.Format.full);
+            TaskManager.executeTask(task, task.getDefaultTaskConfig());
+        }
+    }//GEN-LAST:event_importBtnActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField descField;
     private javax.swing.JTextField idField;
+    private javax.swing.JButton importBtn;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -166,7 +190,7 @@ public class GDSSubsetViewerPane extends javax.swing.JPanel implements SOFTViewe
     }
 
     public void closeView(SOFT soft) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        sampleTabbedPane.remove(sampleTabbedPane.indexOfTab(soft.getId()));
     }
 
     public static void main(String[] args) throws Exception {

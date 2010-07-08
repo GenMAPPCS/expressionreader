@@ -65,10 +65,18 @@
               <SubComponents>
                 <Component class="javax.swing.JButton" name="viewSampleBtn">
                   <Properties>
-                    <Property name="text" type="java.lang.String" value=" View "/>
+                    <Property name="text" type="java.lang.String" value="  View  "/>
                   </Properties>
                   <Events>
                     <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="viewSampleBtnActionPerformed"/>
+                  </Events>
+                </Component>
+                <Component class="javax.swing.JButton" name="importBtn">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" value=" Import "/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="importBtnActionPerformed"/>
                   </Events>
                 </Component>
               </SubComponents>
