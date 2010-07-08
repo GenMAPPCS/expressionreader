@@ -47,6 +47,7 @@ public class GDSViewerDialog extends javax.swing.JDialog implements SOFTViewer {
 
         jSplitPane1.setLeftComponent(softViewerPane);
 
+        subsetTabbedPane.setBorder(javax.swing.BorderFactory.createTitledBorder("Subsets"));
         subsetTabbedPane.setMinimumSize(new java.awt.Dimension(320, 420));
         subsetTabbedPane.setPreferredSize(new java.awt.Dimension(420, 420));
         jSplitPane1.setRightComponent(subsetTabbedPane);
@@ -90,7 +91,7 @@ public class GDSViewerDialog extends javax.swing.JDialog implements SOFTViewer {
             List<SOFT> subsets = gds.getSubsets();
             for (SOFT subset : subsets) {
                 GDSSubsetViewerPane pane = new GDSSubsetViewerPane();
-                pane.setSOFT(subset);
+                pane.setSOFT(subset, soft.getDataTables().getFirst().getHeaders());
                 this.subsetTabbedPane.add(pane, subset.getId());
             }
         } else {

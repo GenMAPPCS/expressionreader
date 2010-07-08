@@ -101,7 +101,7 @@ public class SOFTViewerPane extends javax.swing.JPanel {
 
             @Override
             public int getRowCount() {
-                return dt.getData().size();
+                return dt.getData().size() > 20 ? 20 : dt.getData().size();
             }
 
             @Override
@@ -201,6 +201,7 @@ public class SOFTViewerPane extends javax.swing.JPanel {
         dataWrapperPane.setPreferredSize(new java.awt.Dimension(500, 229));
         dataWrapperPane.setLayout(new java.awt.GridBagLayout());
 
+        dataTable.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
         dataTable.setRowHeight(22);
         dataScrollPane.setViewportView(dataTable);
 

@@ -35,10 +35,13 @@ public class GDS extends SOFT {
     public GDS(SOFT soft) {
         super();
         this.setFields(soft.getFields());
-        this.setType(Type.GSE);
+        this.setType(Type.GDS);
         this.setId(soft.getId());
         this.setDataTables(soft.getDataTables());
     }
 
-    
+    @Override
+    public SOFT.Type getType() {
+        return Type.GDS;
+    }
 }

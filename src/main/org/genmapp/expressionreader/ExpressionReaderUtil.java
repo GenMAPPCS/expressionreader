@@ -2,7 +2,6 @@ package org.genmapp.expressionreader;
 
 import java.awt.Container;
 import java.awt.Frame;
-import java.awt.event.WindowEvent;
 import org.genmapp.expressionreader.data.SOFT;
 import org.genmapp.expressionreader.parser.SOFTParser;
 import java.io.BufferedInputStream;
@@ -16,14 +15,11 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.text.ParseException;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.WindowConstants;
@@ -39,6 +35,7 @@ public class ExpressionReaderUtil {
     public static final String GEO_URL = "http://www.ncbi.nlm.nih.gov/projects/geo/query/acc.cgi?acc=%s&targ=self&form=%s&view=%s";
     public static final String GDS_FTP = "ftp://ftp.ncbi.nih.gov/pub/geo/DATA/SOFT/GDS/%s.soft.gz";
     public static final String GSE_FTP = "ftp://ftp.ncbi.nih.gov/pub/geo/DATA/SOFT/by_series/%s_family.soft.gz";
+    public static final String GSE_FAMILY = "http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=%s&targ=all&form=text&view=full";
 
     public static boolean downloadSOFTGZ(String urlStr, File file) {
         final int BUFFER = 2048;
@@ -235,37 +232,16 @@ public class ExpressionReaderUtil {
                 }
             }
             return soft;
-        } else if (type == SOFT.Type.GSE && format == SOFT.Format.family) {
-            File tmpFile = new File(tmpDir, geoId + "_family.soft");
-            boolean result = true;
-            if (!tmpFile.exists()) {
-                result = downloadSOFTGZ(String.format(GSE_FTP, geoId), tmpFile);
-            }
-            InputStream in = null;
-            SOFT soft = null;
-            try {
-                if (result) {
-                    in = new FileInputStream(tmpFile);
-                } else {
-                    // Download failed somehow, maybe not saved to file
-                    URL url = new URL(String.format(GSE_FTP, geoId));
-                    in = new GZIPInputStream(url.openConnection().getInputStream());
-                }
-                soft = new SOFTParser().parseSOFT(in, type, format);
-            } finally {
-                if (in != null) {
-                    try {
-                        in.close();
-                    } catch (IOException ex) {
-                    }
-                }
-            }
-            return soft;
         } else {
             File tmpFile = new File(tmpDir, geoId + '-' + format + ".txt");
             boolean result = true;
+            String urlStr = null;
             if (!tmpFile.exists()) {
-                result = downloadURL(String.format(GEO_URL, geoId, "text", format), tmpFile);
+                if (format == SOFT.Format.family)
+                    urlStr = String.format(GSE_FAMILY, geoId);
+                else
+                    urlStr = String.format(GEO_URL, geoId, "text", format);
+                result = downloadURL(urlStr, tmpFile);
             }
             InputStream in = null;
             SOFT soft = null;
@@ -274,7 +250,7 @@ public class ExpressionReaderUtil {
                     in = new FileInputStream(tmpFile);
                 } else {
                     // Download failed somehow, maybe not saved to file
-                    URL url = new URL(String.format(GEO_URL, geoId, "text", format));
+                    URL url = new URL(urlStr);
                     in = url.openConnection().getInputStream();
                 }
                 soft = new SOFTParser().parseSOFT(in, type, format);

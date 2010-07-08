@@ -15,8 +15,8 @@ import cytoscape.Cytoscape;
 import cytoscape.task.ui.JTaskConfig;
 import cytoscape.task.util.TaskManager;
 import java.util.Map;
-import javax.swing.DefaultListModel;
 import javax.swing.JDialog;
+import javax.swing.table.AbstractTableModel;
 import org.genmapp.expressionreader.ExpressionReaderUtil;
 import org.genmapp.expressionreader.data.GDS;
 import org.genmapp.expressionreader.data.SOFT;
@@ -48,8 +48,6 @@ public class GDSSubsetViewerPane extends javax.swing.JPanel implements SOFTViewe
         jPanel2 = new javax.swing.JPanel();
         viewSampleBtn = new javax.swing.JButton();
         importBtn = new javax.swing.JButton();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        sampleList = new javax.swing.JList();
         jPanel3 = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
         idField = new javax.swing.JTextField();
@@ -57,6 +55,8 @@ public class GDSSubsetViewerPane extends javax.swing.JPanel implements SOFTViewe
         descField = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
         typeField = new javax.swing.JTextField();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        sampleTable = new javax.swing.JTable();
 
         setLayout(new java.awt.BorderLayout());
 
@@ -66,6 +66,8 @@ public class GDSSubsetViewerPane extends javax.swing.JPanel implements SOFTViewe
         sampleTabbedPane.setPreferredSize(new java.awt.Dimension(12, 320));
         jSplitPane1.setRightComponent(sampleTabbedPane);
 
+        jPanel1.setMinimumSize(new java.awt.Dimension(192, 302));
+        jPanel1.setPreferredSize(new java.awt.Dimension(452, 578));
         jPanel1.setLayout(new java.awt.BorderLayout());
 
         viewSampleBtn.setText("  View  ");
@@ -85,10 +87,6 @@ public class GDSSubsetViewerPane extends javax.swing.JPanel implements SOFTViewe
         jPanel2.add(importBtn);
 
         jPanel1.add(jPanel2, java.awt.BorderLayout.SOUTH);
-
-        jScrollPane1.setViewportView(sampleList);
-
-        jPanel1.add(jScrollPane1, java.awt.BorderLayout.CENTER);
 
         jLabel3.setText("ID:");
         jPanel3.add(jLabel3);
@@ -110,25 +108,32 @@ public class GDSSubsetViewerPane extends javax.swing.JPanel implements SOFTViewe
 
         jPanel1.add(jPanel3, java.awt.BorderLayout.PAGE_START);
 
+        jScrollPane1.setViewportView(sampleTable);
+
+        jPanel1.add(jScrollPane1, java.awt.BorderLayout.CENTER);
+
         jSplitPane1.setTopComponent(jPanel1);
 
         add(jSplitPane1, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
 
     private void viewSampleBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewSampleBtnActionPerformed
-        String gsmId = (String)sampleList.getSelectedValue();
-        int index = sampleTabbedPane.indexOfTab(gsmId);
-        if (index < 0) { // create a new tab and add to it
-            SOFTDownloadTask task = new SOFTDownloadTask(gsmId, this, SOFT.Format.quick);
-            JTaskConfig config = task.getDefaultTaskConfig();
-            boolean success = TaskManager.executeTask(task, config);
-        } else { // bring the tab into focus
-            sampleTabbedPane.setSelectedIndex(index);
+        int[] rows = sampleTable.getSelectedRows();
+        for (int row : rows) {
+            String gsmId = (String) sampleTable.getModel().getValueAt(row, 0);
+            int index = sampleTabbedPane.indexOfTab(gsmId);
+            if (index < 0) { // create a new tab and add to it
+                SOFTDownloadTask task = new SOFTDownloadTask(gsmId, this);
+                JTaskConfig config = task.getDefaultTaskConfig();
+                boolean success = TaskManager.executeTask(task, config);
+            } else { // bring the tab into focus
+                sampleTabbedPane.setSelectedIndex(index);
+            }
         }
     }//GEN-LAST:event_viewSampleBtnActionPerformed
 
     private void importBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importBtnActionPerformed
-        String gsmId = (String) sampleList.getSelectedValue();
+        String gsmId = (String)sampleTable.getModel().getValueAt(sampleTable.getSelectedRow(), 0);
         if (gsmId != null && !"".equals(gsmId)) {
             SOFTDownloadTask task = new SOFTDownloadTask(gsmId, new SOFTViewer() {
 
@@ -140,7 +145,7 @@ public class GDSSubsetViewerPane extends javax.swing.JPanel implements SOFTViewe
                 public void closeView(SOFT soft) {
                     // do nothing
                 }
-            }, SOFT.Format.full);
+            });
             TaskManager.executeTask(task, task.getDefaultTaskConfig());
         }
     }//GEN-LAST:event_importBtnActionPerformed
@@ -158,13 +163,13 @@ public class GDSSubsetViewerPane extends javax.swing.JPanel implements SOFTViewe
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSplitPane jSplitPane1;
-    private javax.swing.JList sampleList;
     private javax.swing.JTabbedPane sampleTabbedPane;
+    private javax.swing.JTable sampleTable;
     private javax.swing.JTextField typeField;
     private javax.swing.JButton viewSampleBtn;
     // End of variables declaration//GEN-END:variables
 
-    public void setSOFT(SOFT soft) {
+    public void setSOFT(final SOFT soft, final Map<String, String> header) {
         if (!"SUBSET".equals(soft.getTypeStr()))
             return;
 
@@ -173,12 +178,45 @@ public class GDSSubsetViewerPane extends javax.swing.JPanel implements SOFTViewe
         this.descField.setText((String)fields.get("subset_description"));
         this.typeField.setText((String)fields.get("subset_type"));
         
-        String[] list = ((String)fields.get("subset_sample_id")).split(",");
-        DefaultListModel model = new DefaultListModel();
-        for (String obj : list) {
-            model.addElement(obj);
-        }
-        this.sampleList.setModel(model);
+        final String[] list = ((String)fields.get("subset_sample_id")).split(",");
+        AbstractTableModel model = new AbstractTableModel() {
+            @Override
+            public String getColumnName(int i) {
+                switch (i) {
+                    case 0:
+                        return "ID";
+                    case 1:
+                        return "Title";
+                    case 2:
+                        return "Source";
+                    default:
+                        return "";
+                }
+            }
+
+            public int getRowCount() {
+                return list.length;
+            }
+            public int getColumnCount() {
+                return 3;
+            }
+            public Object getValueAt(int i, int i1) {
+                if (i1 == 0) {
+                    return list[i];
+                } else {
+                    String[] desc = header.get(list[i]).split(";");
+                    if (i1 == 1) {
+                        String[] str = desc[0].split(":");
+                        return str[1];
+                    } else {
+                        String[] str = desc[1].split(":");
+                        return str[1];         
+                    }
+                }
+            }
+        };
+
+        this.sampleTable.setModel(model);
     }
 
     public void viewSOFT(SOFT soft) {
@@ -206,7 +244,7 @@ public class GDSSubsetViewerPane extends javax.swing.JPanel implements SOFTViewe
                 GDSSubsetViewerPane pane = new GDSSubsetViewerPane();
                 dialog.setContentPane(pane);
                 GDS gds = (GDS)soft;
-                pane.setSOFT(gds.getSubsets().get(0));
+                pane.setSOFT(gds.getSubsets().get(0), gds.getDataTables().getFirst().getHeaders());
                 dialog.pack();
                 dialog.setVisible(true);
             }

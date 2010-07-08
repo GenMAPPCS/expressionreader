@@ -5,6 +5,7 @@
 
 package org.genmapp.expressionreader.ui;
 
+import java.util.List;
 import org.genmapp.expressionreader.data.SOFT;
 
 /**

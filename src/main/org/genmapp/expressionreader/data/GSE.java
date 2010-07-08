@@ -54,7 +54,7 @@ public class GSE extends SOFT {
      */
     @Override
     public Type getType() {
-        return Type.GSM;
+        return Type.GSE;
     }
 
 

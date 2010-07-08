@@ -5,6 +5,7 @@
 
 package org.genmapp.expressionreader;
 
+import org.genmapp.expressionreader.data.GSE;
 import java.util.List;
 import org.genmapp.expressionreader.data.GDS;
 import org.genmapp.expressionreader.data.SOFT;
@@ -58,6 +59,20 @@ public class ExpressionReaderUtilTest {
 
         SOFT gsm = (SOFT)ExpressionReaderUtil.getSOFT("GSM11805", Type.GSM, SOFT.Format.quick);
         assertEquals(22283, gsm.getDataTables().getFirst().getData().size());
+    }
+
+    @Test
+    public void testGetSOFTFamily() throws Exception {
+        GSE soft = (GSE) ExpressionReaderUtil.getSOFT("GSE8854", Type.GSE, SOFT.Format.family);
+        assertNotNull(soft);
+        assertEquals(9, soft.getPlatforms().size());
+    }
+
+    @Test
+    public void testGetSOFTFamily2() throws Exception {
+        GSE soft = (GSE) ExpressionReaderUtil.getSOFT("GSE9914", Type.GSE, SOFT.Format.family);
+        assertNotNull(soft);
+        assertEquals(6, soft.getDataTables().size());
     }
 
     /**

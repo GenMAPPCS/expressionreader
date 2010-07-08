@@ -456,7 +456,7 @@ public class GSMImportDialog extends javax.swing.JDialog implements SOFTViewer {
     private void importGPLBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importGPLBtnActionPerformed
         if ("Import GPL Data".equals(evt.getActionCommand())) {
             String gplId = (String) soft.getFields().get("Sample_platform_id");
-            SOFTDownloadTask task = new SOFTDownloadTask(gplId, this, SOFT.Format.full);
+            SOFTDownloadTask task = new SOFTDownloadTask(gplId, this);
             JTaskConfig config = task.getDefaultTaskConfig();
             TaskManager.executeTask(task, config);
         } else if ("View GPL Data".equals(evt.getActionCommand())) {

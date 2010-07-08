@@ -155,6 +155,7 @@ public class SOFTParser {
                     break;
                 case family:
                     soft = parseGSEFamilySOFT(in);
+                    break;
                 default:
                     throw new UnsupportedOperationException("Can't parse format: " + format.name());
             }
@@ -223,10 +224,12 @@ public class SOFTParser {
                 this.currentId = m.group(2);
                 this.currentType = m.group(1);
 
-                if (!"DATABASE".equals(currentType)) {
+                if ("DATABASE".equals(currentType)) {
+                    database = parseSOFTSection(reader);
+                } else if (!"SERIES".equals(currentType)) {
                     throw new ParseException(String.format("[%d] Wrong type: %s, where expecting DATABASE.", lineNumber, currentType), lineNumber);
                 }
-                database = parseSOFTSection(reader);
+
             }
 
             SOFT soft = parseSOFTSection(reader);

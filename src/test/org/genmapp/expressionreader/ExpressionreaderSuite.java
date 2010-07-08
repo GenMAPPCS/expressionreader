@@ -17,7 +17,7 @@ import org.junit.runners.Suite;
  * @author djiao
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({org.genmapp.expressionreader.actions.ActionsSuite.class,org.genmapp.expressionreader.ui.UiSuite.class,org.genmapp.expressionreader.ExpressionReaderUtilTest.class,org.genmapp.expressionreader.parser.ParserSuite.class,org.genmapp.expressionreader.tasks.TasksSuite.class,org.genmapp.expressionreader.data.DataSuite.class,org.genmapp.expressionreader.ExpressionReaderPluginTest.class})
+@Suite.SuiteClasses({org.genmapp.expressionreader.actions.ActionsSuite.class,org.genmapp.expressionreader.ExpressionReaderUtilTest.class,org.genmapp.expressionreader.parser.ParserSuite.class,org.genmapp.expressionreader.tasks.TasksSuite.class,org.genmapp.expressionreader.data.DataSuite.class,org.genmapp.expressionreader.ExpressionReaderPluginTest.class})
 public class ExpressionreaderSuite {
 
     @BeforeClass

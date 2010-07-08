@@ -272,24 +272,25 @@ public class GEOSearchDialog extends javax.swing.JDialog {
 
                     public void viewSOFT(SOFT soft) {
                         if (soft.getType() == SOFT.Type.GSM) {
-                            GSMImportDialog dialog = new GSMImportDialog(Cytoscape.getDesktop(), true, soft);
+                            GSMImportDialog dialog = new GSMImportDialog(Cytoscape.getDesktop(), false, soft);
                             dialog.setVisible(true);
                         } else if (soft.getType() == SOFT.Type.GSE) {
-                            GSEViewerDialog dialog = new GSEViewerDialog(Cytoscape.getDesktop(), true, soft);
+                            GSEViewerDialog dialog = new GSEViewerDialog(Cytoscape.getDesktop(), false);
+                            dialog.setSOFT(soft);
                             dialog.setVisible(true);
                         } else if (soft.getType() == SOFT.Type.GDS) {
-                            GDSViewerDialog dialog = new GDSViewerDialog(Cytoscape.getDesktop(), true);
+                            GDSViewerDialog dialog = new GDSViewerDialog(Cytoscape.getDesktop(), false);
                             dialog.setSOFT(soft);
                             dialog.setVisible(true);
                         } else if (soft.getType() == SOFT.Type.GPL) {
-                            ExpressionReaderUtil.showSOFTViewerDialog(Cytoscape.getDesktop(), true, soft);
+                            ExpressionReaderUtil.showSOFTViewerDialog(Cytoscape.getDesktop(), false, soft);
                         }
                     }
 
                     public void closeView(SOFT soft) {
                         // not implemented
                     }
-                }, SOFT.Format.full);
+                });
             JTaskConfig config = task.getDefaultTaskConfig();
 
             TaskManager.executeTask(task, config);
