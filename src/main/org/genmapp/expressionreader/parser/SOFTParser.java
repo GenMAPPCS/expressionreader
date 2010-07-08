@@ -16,11 +16,11 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.genmapp.expressionreader.data.GDS;
 
 public class SOFTParser {
 
@@ -36,6 +36,7 @@ public class SOFTParser {
 
     private SOFT parseSOFTSection(BufferedReader in) throws IOException, ParseException {
         SOFT soft = new SOFT(currentId);
+        soft.setTypeStr(currentType);
         Pattern fieldPattern = Pattern.compile(FIELD_PATTERN);
         Pattern tableheaderPattern = Pattern.compile(TABLE_HEADER_PATTERN);
         Pattern idPattern = Pattern.compile(ID_PATTERN);
@@ -50,6 +51,8 @@ public class SOFTParser {
         String line = null;
         LinkedHashMap<String, Object> fields = new LinkedHashMap<String, Object>();
         boolean inTable = false;
+
+        int start = lineNumber;
         while ((line = in.readLine()) != null) {
             lineNumber++;
             Matcher m = idPattern.matcher(line); // end parsing this section
@@ -112,12 +115,16 @@ public class SOFTParser {
                 }
                 continue;
             }
-
             throw new ParseException("Failed to parse line (" + lineNumber + "): " + line, lineNumber);
         }
-        soft.setFields(fields);
-        soft.setDataTables(tables);
-        return soft;
+
+        if (lineNumber > start) { // check if any line was parsed
+            soft.setFields(fields);
+            soft.setDataTables(tables);
+            return soft;
+        } else {
+            return null;
+        }
     }
 
     public SOFT parseSOFT(InputStream in, SOFT.Type type) throws ParseException, IOException {
@@ -136,15 +143,21 @@ public class SOFTParser {
 
     public SOFT parseSOFT(Reader in, SOFT.Type type, SOFT.Format format) throws ParseException {
         SOFT soft = null;
-        switch (format) {
-            case quick:
-                soft = parseQuickSOFT(in, type);
-                break;
-            case full:
-                soft = parseQuickSOFT(in, type);
-                break;
-            default:
-                throw new UnsupportedOperationException("Can't parse format: " + format.name());
+        if (SOFT.Type.GDS == type) {
+            soft = parseGDS(in);
+        } else {
+            switch (format) {
+                case quick:
+                    soft = parseQuickSOFT(in, type);
+                    break;
+                case full:
+                    soft = parseQuickSOFT(in, type);
+                    break;
+                case family:
+                    soft = parseGSEFamilySOFT(in);
+                default:
+                    throw new UnsupportedOperationException("Can't parse format: " + format.name());
+            }
         }
         if (soft != null) {
             soft.setFormat(format);
@@ -153,58 +166,97 @@ public class SOFTParser {
         return soft;
     }
 
-    private SOFT parseGSEFamilySOFT(Reader in, SOFT.Type type) throws ParseException {
-        if (type == SOFT.Type.GPL || type == SOFT.Type.GSM) {
-            return parseQuickSOFT(in, type);
-        } else if (type == SOFT.Type.GSE) {
-            GSE gse = null;
-            BufferedReader reader = null;
-            try {
-                reader = in instanceof BufferedReader ? (BufferedReader) in : new BufferedReader(in);
-                Pattern idPattern = Pattern.compile(ID_PATTERN);
-                String line = reader.readLine();
-                lineNumber++;
-                Matcher m = idPattern.matcher(line);
-                if (m.matches()) {
-                    this.currentId = m.group(2);
-                    this.currentType = m.group(1);
+    private GDS parseGDS(Reader in) throws ParseException {
+        GDS gds = null;
+        BufferedReader reader = null;
+        try {
+            reader = in instanceof BufferedReader ? (BufferedReader) in : new BufferedReader(in);
+            Pattern idPattern = Pattern.compile(ID_PATTERN);
+            String line = reader.readLine();
+            lineNumber++;
+            Matcher m = idPattern.matcher(line);
 
-                    if (!getTypeHeader(type).equals(currentType)) {
-                        throw new ParseException("Wrong type: " + currentType + ", where expecting " + getTypeHeader(type), 0);
-                    }
-                    SOFT soft = parseSOFTSection(reader);
-                    gse = new GSE(soft);
-                    List<SOFT> platforms = new ArrayList<SOFT>();
-                    List<SOFT> samples = new ArrayList<SOFT>();
-                    while ((soft = parseSOFTSection(reader)) != null) {
-                        if (soft.getType() == SOFT.Type.GPL) {
-                            platforms.add(soft);
-                        } else if (soft.getType() == SOFT.Type.GSM) {
-                            samples.add(soft);
-                        } else {
-                            throw new ParseException("Wrong type found: " + soft.getType(), lineNumber);
-                        }
-                    }
-                    gse.setPlatforms(platforms);
-                    gse.setSamples(samples);
-                } else {
-                    throw new ParseException("Invalid first line", 0);
+            SOFT database = null;
+            if (m.matches()) {
+                this.currentId = m.group(2);
+                this.currentType = m.group(1);
+
+                if (!"DATABASE".equals(currentType)) {
+                    throw new ParseException(String.format("[%d] Wrong type: %s, where expecting DATABASE.", lineNumber, currentType), lineNumber);
                 }
-            } catch (IOException ex) {
-                Logger.getLogger(SOFTParser.class.getName()).log(Level.SEVERE, null, ex);
-            } finally {
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (IOException ioex) {
-                    }
+                database = parseSOFTSection(reader);
+            }
+
+            SOFT soft = parseSOFTSection(reader);
+            gds = new GDS(soft);
+            gds.setDatabase(database);
+
+            List<SOFT> subsets = new ArrayList<SOFT>();
+            while ((soft = parseSOFTSection(reader)) != null) {
+                if ("SUBSET".equals(soft.getTypeStr())) {
+                    subsets.add(soft);
+                } else if ("DATASET".equals(soft.getTypeStr())) {
+                    gds.setDataTables(soft.getDataTables());
+                } else {
+                    throw new ParseException(String.format("[%d] Wrong type found: %s", lineNumber, soft.getType()), lineNumber);
                 }
             }
-            return gse;
-        } else {
-            throw new UnsupportedOperationException("Only supports GPL, GSM and GSE parsing");
+            gds.setSubsets(subsets);
+        } catch (IOException ex) {
+            Logger.getLogger(SOFTParser.class.getName()).log(Level.SEVERE, null, ex);
         }
+        return gds;
+    }
 
+    private GSE parseGSEFamilySOFT(Reader in) throws ParseException {
+        SOFT.Type type = SOFT.Type.GSE;
+        GSE gse = null;
+        BufferedReader reader = null;
+        try {
+            reader = in instanceof BufferedReader ? (BufferedReader) in : new BufferedReader(in);
+            Pattern idPattern = Pattern.compile(ID_PATTERN);
+            String line = reader.readLine();
+            lineNumber++;
+            Matcher m = idPattern.matcher(line);
+            SOFT database = null;
+            if (m.matches()) {
+                this.currentId = m.group(2);
+                this.currentType = m.group(1);
+
+                if (!"DATABASE".equals(currentType)) {
+                    throw new ParseException(String.format("[%d] Wrong type: %s, where expecting DATABASE.", lineNumber, currentType), lineNumber);
+                }
+                database = parseSOFTSection(reader);
+            }
+
+            SOFT soft = parseSOFTSection(reader);
+            gse = new GSE(soft);
+            gse.setDatabase(database);
+
+            List<SOFT> platforms = new ArrayList<SOFT>();
+            List<SOFT> samples = new ArrayList<SOFT>();
+            while ((soft = parseSOFTSection(reader)) != null) {
+                if ("PLATFORM".equals(soft.getTypeStr())) {
+                    platforms.add(soft);
+                } else if ("SAMPLE".equals(soft.getTypeStr())) {
+                    samples.add(soft);
+                } else {
+                    throw new ParseException(String.format("[%d] Wrong type found: %s", lineNumber, soft.getType()), lineNumber);
+                }
+            }
+            gse.setPlatforms(platforms);
+            gse.setSamples(samples);
+        } catch (IOException ex) {
+            Logger.getLogger(SOFTParser.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException ioex) {
+                }
+            }
+        }
+        return gse;
     }
 
     private SOFT parseQuickSOFT(Reader in, Type type) throws ParseException {

@@ -17,6 +17,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import javax.swing.JOptionPane;
 
 /**
@@ -26,6 +29,53 @@ import javax.swing.JOptionPane;
 public class ExpressionReaderUtil {
 
     public static final String GEO_URL = "http://www.ncbi.nlm.nih.gov/projects/geo/query/acc.cgi?acc=%s&targ=self&form=%s&view=%s";
+    public static final String GDS_FTP = "ftp://ftp.ncbi.nih.gov/pub/geo/DATA/SOFT/GDS/%s.soft.gz";
+    public static final String GSE_FTP = "ftp://ftp.ncbi.nih.gov/pub/geo/DATA/SOFT/by_series/%s_family.soft.gz";
+
+    public static boolean downloadSOFTGZ(String urlStr, File file) {
+        final int BUFFER = 2048;
+        BufferedInputStream bis = null;
+        BufferedOutputStream dest = null;
+        GZIPInputStream zis = null;
+        System.out.println(urlStr);
+        try {
+            URL url = new URL(urlStr);
+            URLConnection urlc = url.openConnection();
+            zis = new GZIPInputStream(urlc.getInputStream());
+            int count;
+            byte data[] = new byte[BUFFER];
+            // write the files to the disk
+            FileOutputStream fos = new FileOutputStream(file);
+            dest = new BufferedOutputStream(fos, BUFFER);
+            while ((count = zis.read(data, 0, BUFFER)) != -1) {
+               dest.write(data, 0, count);
+            }
+            dest.flush();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return false;
+        } finally {
+            if (bis != null) {
+                try {
+                    bis.close();
+                } catch (IOException ioe) {
+                }
+            }
+            if (dest != null) {
+                try {
+                    dest.close();
+                } catch (IOException ioe) {
+                }
+            }
+            if (zis != null) {
+                try {
+                    zis.close();
+                } catch (IOException ioe) {
+                }
+            }
+        }
+        return true;
+    }
 
     public static boolean downloadURL(String urlStr, File file) {
         BufferedInputStream bis = null;
@@ -150,31 +200,85 @@ public class ExpressionReaderUtil {
     }
 
     public static synchronized SOFT getSOFT(String geoId, SOFT.Type type, SOFT.Format format) throws ParseException, IOException {
-
         String tmpDir = System.getProperty("java.io.tmpdir");
-        File tmpFile = new File(tmpDir, geoId + '-' + format + ".txt");
-        boolean result = true;
-        if (!tmpFile.exists()) {
-            result = downloadURL(String.format(GEO_URL, geoId, "text", format), tmpFile);
-        }
-        InputStream in = null;
-        SOFT soft = null;
-        try {
-            if (result) {
-                in = new FileInputStream(tmpFile);
-            } else {
-                // Download failed somehow, maybe not saved to file
-                URL url = new URL(String.format(GEO_URL, geoId, "text", format));
-                in = url.openConnection().getInputStream();
+        if (type == SOFT.Type.GDS) { // GDS ftp only
+            File tmpFile = new File(tmpDir, geoId + ".soft");
+            boolean result = true;
+            if (!tmpFile.exists()) {
+                result = downloadSOFTGZ(String.format(GDS_FTP, geoId), tmpFile);
             }
-            soft = new SOFTParser().parseSOFT(in, type, format);
-        } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException ex) {}
+            InputStream in = null;
+            SOFT soft = null;
+            try {
+                if (result) {
+                    in = new FileInputStream(tmpFile);
+                } else {
+                    // Download failed somehow, maybe not saved to file
+                    URL url = new URL(String.format(GDS_FTP, geoId));
+                    in = new GZIPInputStream(url.openConnection().getInputStream());
+                }
+                soft = new SOFTParser().parseSOFT(in, type, format);
+            } finally {
+                if (in != null) {
+                    try {
+                        in.close();
+                    } catch (IOException ex) {
+                    }
+                }
             }
+            return soft;
+        } else if (type == SOFT.Type.GSE && format == SOFT.Format.family) {
+            File tmpFile = new File(tmpDir, geoId + "_family.soft");
+            boolean result = true;
+            if (!tmpFile.exists()) {
+                result = downloadSOFTGZ(String.format(GSE_FTP, geoId), tmpFile);
+            }
+            InputStream in = null;
+            SOFT soft = null;
+            try {
+                if (result) {
+                    in = new FileInputStream(tmpFile);
+                } else {
+                    // Download failed somehow, maybe not saved to file
+                    URL url = new URL(String.format(GSE_FTP, geoId));
+                    in = new GZIPInputStream(url.openConnection().getInputStream());
+                }
+                soft = new SOFTParser().parseSOFT(in, type, format);
+            } finally {
+                if (in != null) {
+                    try {
+                        in.close();
+                    } catch (IOException ex) {
+                    }
+                }
+            }
+            return soft;
+        } else {
+            File tmpFile = new File(tmpDir, geoId + '-' + format + ".txt");
+            boolean result = true;
+            if (!tmpFile.exists()) {
+                result = downloadURL(String.format(GEO_URL, geoId, "text", format), tmpFile);
+            }
+            InputStream in = null;
+            SOFT soft = null;
+            try {
+                if (result) {
+                    in = new FileInputStream(tmpFile);
+                } else {
+                    // Download failed somehow, maybe not saved to file
+                    URL url = new URL(String.format(GEO_URL, geoId, "text", format));
+                    in = url.openConnection().getInputStream();
+                }
+                soft = new SOFTParser().parseSOFT(in, type, format);
+            } finally {
+                if (in != null) {
+                    try {
+                        in.close();
+                    } catch (IOException ex) {
+                    }
+                }
+            }
+            return soft;
         }
-        return soft;
     }
 }

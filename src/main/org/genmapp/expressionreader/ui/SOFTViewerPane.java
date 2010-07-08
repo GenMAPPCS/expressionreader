@@ -6,13 +6,20 @@
 
 package org.genmapp.expressionreader.ui;
 
-import org.genmapp.expressionreader.data.DataTable;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTable;
 import org.genmapp.expressionreader.data.SOFT;
 import org.genmapp.expressionreader.ExpressionReaderUtil;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import javax.swing.border.TitledBorder;
 import javax.swing.table.AbstractTableModel;
+import org.genmapp.expressionreader.data.DataTable;
 
 /**
  *
@@ -27,12 +34,97 @@ public class SOFTViewerPane extends javax.swing.JPanel {
         initComponents();
     }
 
-    /** Creates new form SOFTViewerPane */
-    public SOFTViewerPane(SOFT soft, SOFTViewer owner) {
-        this.soft = soft;
-        this.owner = owner;
-        initComponents();
+    public SOFTViewer getOwner() {
+        return owner;
     }
+
+    public void setOwner(SOFTViewer owner) {
+        this.owner = owner;
+    }
+
+    public SOFT getSoft() {
+        return soft;
+    }
+
+    public void setSoft(final SOFT soft) {
+        this.soft = soft;
+
+        sampleNameLbl.setText(org.genmapp.expressionreader.ExpressionReaderUtil.getSoftNameLblText(soft));
+        int total = soft.getDataTables().getFirst().getData().size();
+        int numOfRows = total > 20 ? 20 : total;
+            TitledBorder border = (TitledBorder)dataWrapperPane.getBorder();
+        if (soft.getType() == SOFT.Type.GSM) {
+            border.setTitle(String.format("Data (%d rows; displaying top %d)", soft.getFields().get("Sample_data_row_count"), numOfRows));
+        } else {
+            border.setTitle(String.format("Data (%d rows; displaying top %d)", total, numOfRows));
+        }
+
+        metadataTable.setModel(new AbstractTableModel() {
+            @Override
+            public Object getValueAt(int rowIndex, int columnIndex) {
+                LinkedHashMap<String, Object> fields = soft.getFields();
+                List<String> fieldNames = new ArrayList<String>(fields.keySet());
+                if (columnIndex == 0) {
+                    return fieldNames.get(rowIndex);
+                } else {
+                    Object obj = fields.get(fieldNames.get(rowIndex));
+                    if (obj instanceof String) {
+                        return obj;
+                    } else {
+                        List<String> list = (List) obj;
+                        return org.genmapp.expressionreader.ExpressionReaderUtil.join(list, "\n");
+                    }
+                }
+            }
+
+            @Override
+            public int getRowCount() {
+                // TODO Auto-generated method stub
+                return soft.getFields().size();
+            }
+
+            @Override
+            public int getColumnCount() {
+                // TODO Auto-generated method stub
+                return 2;
+            }
+
+            @Override
+            public String getColumnName(int column) {
+                return column == 0 ? "Field" : "Value";
+            }
+        });
+
+        dataTable.setModel(new AbstractTableModel() {
+
+            DataTable dt = soft.getDataTables().getFirst();
+            List<String> keys = new ArrayList<String>(dt.getData().keySet());
+
+            @Override
+            public Object getValueAt(int rowIndex, int columnIndex) {
+                System.out.println(rowIndex + ", " + columnIndex);
+                return dt.getData().get(keys.get(rowIndex)).get(columnIndex);
+            }
+
+            @Override
+            public int getRowCount() {
+                return dt.getData().size();
+            }
+
+            @Override
+            public int getColumnCount() {
+                return dt.getHeaders().size();
+            }
+
+            @Override
+            public String getColumnName(int column) {
+                return (String) new ArrayList(dt.getHeaders().keySet()).get(column);
+            }
+        });
+
+    }
+
+    
 
     /** This method is called from within the constructor to
      * initialize the form.
@@ -59,7 +151,7 @@ public class SOFTViewerPane extends javax.swing.JPanel {
 
         setLayout(new java.awt.GridBagLayout());
 
-        sampleNameLbl.setText(org.genmapp.expressionreader.ExpressionReaderUtil.getSoftNameLblText(soft));
+        sampleNameLbl.setText("SampleID");
         sampleNamePane.add(sampleNameLbl);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -99,41 +191,6 @@ public class SOFTViewerPane extends javax.swing.JPanel {
         metadataWrapperPane.setPreferredSize(new java.awt.Dimension(500, 340));
         metadataWrapperPane.setLayout(new java.awt.GridBagLayout());
 
-        metadataTable.setModel(new AbstractTableModel() {
-            @Override
-            public Object getValueAt(int rowIndex, int columnIndex) {
-                LinkedHashMap<String, Object> fields = soft.getFields();
-                List<String> fieldNames = new ArrayList<String>(fields.keySet());
-                if (columnIndex == 0) {
-                    return fieldNames.get(rowIndex);
-                } else {
-                    Object obj = fields.get(fieldNames.get(rowIndex));
-                    if (obj instanceof String) {
-                        return obj;
-                    } else {
-                        List<String> list = (List) obj;
-                        return org.genmapp.expressionreader.ExpressionReaderUtil.join(list, "\n");
-                    }
-                }
-            }
-
-            @Override
-            public int getRowCount() {
-                // TODO Auto-generated method stub
-                return soft.getFields().size();
-            }
-
-            @Override
-            public int getColumnCount() {
-                // TODO Auto-generated method stub
-                return 2;
-            }
-
-            @Override
-            public String getColumnName(int column) {
-                return column == 0 ? "Field" : "Value";
-            }
-        });
         metadataTable.setMinimumSize(new java.awt.Dimension(0, 150));
         metadataTable.setRowHeight(22);
         metadataScrollPane.setViewportView(metadataTable);
@@ -147,36 +204,10 @@ public class SOFTViewerPane extends javax.swing.JPanel {
 
         jSplitPane1.setLeftComponent(metadataWrapperPane);
 
-        dataWrapperPane.setBorder(javax.swing.BorderFactory.createTitledBorder("Data (" + soft.getFields().get("Sample_data_row_count") + " Rows, displaying " + soft.getDataTables().getFirst().getData().size() +")"));
+        dataWrapperPane.setBorder(javax.swing.BorderFactory.createTitledBorder("Data"));
         dataWrapperPane.setPreferredSize(new java.awt.Dimension(500, 229));
         dataWrapperPane.setLayout(new java.awt.GridBagLayout());
 
-        dataTable.setModel(new AbstractTableModel() {
-
-            DataTable dt = soft.getDataTables().getFirst();
-            List<String> keys = new ArrayList<String>(dt.getData().keySet());
-
-            @Override
-            public Object getValueAt(int rowIndex, int columnIndex) {
-                System.out.println(rowIndex + ", " + columnIndex);
-                return dt.getData().get(keys.get(rowIndex)).get(columnIndex);
-            }
-
-            @Override
-            public int getRowCount() {
-                return dt.getData().size();
-            }
-
-            @Override
-            public int getColumnCount() {
-                return dt.getHeaders().size();
-            }
-
-            @Override
-            public String getColumnName(int column) {
-                return (String) new ArrayList(dt.getHeaders().keySet()).get(column);
-            }
-        });
         dataTable.setRowHeight(22);
         dataScrollPane.setViewportView(dataTable);
 
@@ -224,5 +255,101 @@ public class SOFTViewerPane extends javax.swing.JPanel {
     private javax.swing.JButton viewInBrowserBtn;
     private javax.swing.JPanel viewInBrowserPane;
     // End of variables declaration//GEN-END:variables
+
+    public JButton getCloseButton() {
+        return closeButton;
+    }
+
+    public void setCloseButton(JButton closeButton) {
+        this.closeButton = closeButton;
+    }
+
+    public JScrollPane getDataScrollPane() {
+        return dataScrollPane;
+    }
+
+    public void setDataScrollPane(JScrollPane dataScrollPane) {
+        this.dataScrollPane = dataScrollPane;
+    }
+
+    public JTable getDataTable() {
+        return dataTable;
+    }
+
+    public void setDataTable(JTable dataTable) {
+        this.dataTable = dataTable;
+    }
+
+    public JPanel getDataWrapperPane() {
+        return dataWrapperPane;
+    }
+
+    public void setDataWrapperPane(JPanel dataWrapperPane) {
+        this.dataWrapperPane = dataWrapperPane;
+    }
+
+    public JSplitPane getjSplitPane1() {
+        return jSplitPane1;
+    }
+
+    public void setjSplitPane1(JSplitPane jSplitPane1) {
+        this.jSplitPane1 = jSplitPane1;
+    }
+
+    public JScrollPane getMetadataScrollPane() {
+        return metadataScrollPane;
+    }
+
+    public void setMetadataScrollPane(JScrollPane metadataScrollPane) {
+        this.metadataScrollPane = metadataScrollPane;
+    }
+
+    public JTable getMetadataTable() {
+        return metadataTable;
+    }
+
+    public void setMetadataTable(JTable metadataTable) {
+        this.metadataTable = metadataTable;
+    }
+
+    public JPanel getMetadataWrapperPane() {
+        return metadataWrapperPane;
+    }
+
+    public void setMetadataWrapperPane(JPanel metadataWrapperPane) {
+        this.metadataWrapperPane = metadataWrapperPane;
+    }
+
+    public JLabel getSampleNameLbl() {
+        return sampleNameLbl;
+    }
+
+    public void setSampleNameLbl(JLabel sampleNameLbl) {
+        this.sampleNameLbl = sampleNameLbl;
+    }
+
+    public JPanel getSampleNamePane() {
+        return sampleNamePane;
+    }
+
+    public void setSampleNamePane(JPanel sampleNamePane) {
+        this.sampleNamePane = sampleNamePane;
+    }
+
+    public JButton getViewInBrowserBtn() {
+        return viewInBrowserBtn;
+    }
+
+    public void setViewInBrowserBtn(JButton viewInBrowserBtn) {
+        this.viewInBrowserBtn = viewInBrowserBtn;
+    }
+
+    public JPanel getViewInBrowserPane() {
+        return viewInBrowserPane;
+    }
+
+    public void setViewInBrowserPane(JPanel viewInBrowserPane) {
+        this.viewInBrowserPane = viewInBrowserPane;
+    }
 
 }

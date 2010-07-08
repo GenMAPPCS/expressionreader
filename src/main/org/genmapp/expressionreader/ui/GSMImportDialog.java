@@ -26,9 +26,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 
 /**
@@ -442,8 +441,23 @@ public class GSMImportDialog extends javax.swing.JDialog implements SOFTViewer {
     }//GEN-LAST:event_viewInBrowserBtnActionPerformed
 
     private void viewSampleDataBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewSampleDataBtnActionPerformed
-        SOFTViewerDialog dialog = new SOFTViewerDialog(this, false);
-        dialog.viewSOFT(soft);
+        final JDialog self = this;
+        SOFTViewer viewer = new SOFTViewer() {
+            JDialog dialog = null;
+            public void viewSOFT(SOFT soft) {
+                dialog = new JDialog(self);
+                SOFTViewerPane pane = new SOFTViewerPane();
+                dialog.setContentPane(pane);
+                pane.setSoft(soft);
+                dialog.setSize(600, 760);
+                dialog.setVisible(true);
+            }
+
+            public void closeView(SOFT soft) {
+                dialog.dispose();
+            }
+        };
+        viewer.viewSOFT(soft);
     }//GEN-LAST:event_viewSampleDataBtnActionPerformed
     private void idMapConfigBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_idMapConfigBtnActionPerformed
         boolean result = client.openMappingResourceConfigDialog();
@@ -463,8 +477,25 @@ public class GSMImportDialog extends javax.swing.JDialog implements SOFTViewer {
             TaskManager.executeTask(task, config);
         } else if ("View GPL Data".equals(evt.getActionCommand())) {
             if (soft.getType() == SOFT.Type.GSM) {
-                SOFTViewerDialog dialog = new SOFTViewerDialog(this, false);
-                dialog.viewSOFT(this.gpl);
+                final JDialog self = this;
+                SOFTViewer viewer = new SOFTViewer() {
+
+                    JDialog dialog = null;
+
+                    public void viewSOFT(SOFT soft) {
+                        dialog = new JDialog(self);
+                        SOFTViewerPane pane = new SOFTViewerPane();
+                        dialog.setContentPane(pane);
+                        pane.setSoft(soft);
+                        dialog.setSize(600, 760);
+                        dialog.setVisible(true);
+                    }
+
+                    public void closeView(SOFT soft) {
+                        dialog.dispose();
+                    }
+                };
+                viewer.viewSOFT(this.gpl);
             }
         }
     }//GEN-LAST:event_importGPLBtnActionPerformed
@@ -496,12 +527,10 @@ public class GSMImportDialog extends javax.swing.JDialog implements SOFTViewer {
                     });
                     dialog.setVisible(true);
                 } catch (Exception ex) {
-                    Logger.getLogger(SOFTViewerDialog.class.getName()).log(Level.SEVERE, null, ex);
                 } finally {
                     try {
                         gplIn.close();
                     } catch (IOException ex) {
-                        Logger.getLogger(SOFTViewerDialog.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
             }

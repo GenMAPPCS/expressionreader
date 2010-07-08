@@ -11,6 +11,7 @@
 
 package org.genmapp.expressionreader.ui;
 
+import cytoscape.Cytoscape;
 import cytoscape.task.ui.JTaskConfig;
 import cytoscape.task.util.TaskManager;
 import org.genmapp.expressionreader.data.SOFT;
@@ -60,11 +61,18 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
         sampleList = new javax.swing.JList();
         sampleButtonPane = new javax.swing.JPanel();
         viewBtn = new javax.swing.JButton();
+        importSampleBtn = new javax.swing.JButton();
         addToGruopBtn = new javax.swing.JButton();
         platformPane = new javax.swing.JPanel();
         platformScrollPane = new javax.swing.JScrollPane();
         platformList = new javax.swing.JList();
         platformButtonPane = new javax.swing.JPanel();
+        groupsPane = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jList1 = new javax.swing.JList();
+        jPanel1 = new javax.swing.JPanel();
+        viewGroupBtn = new javax.swing.JButton();
+        importGroupBtn = new javax.swing.JButton();
         gsmInfoPane = new javax.swing.JPanel();
         metadataWrapperPane = new javax.swing.JPanel();
         metadataScrollPane = new javax.swing.JScrollPane();
@@ -110,7 +118,16 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
         });
         sampleButtonPane.add(viewBtn);
 
-        addToGruopBtn.setText("Add to group");
+        importSampleBtn.setText(" Import ");
+        importSampleBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                importSampleBtnActionPerformed(evt);
+            }
+        });
+        sampleButtonPane.add(importSampleBtn);
+
+        addToGruopBtn.setText(" Group ");
+        addToGruopBtn.setEnabled(false);
         sampleButtonPane.add(addToGruopBtn);
 
         samplePane.add(sampleButtonPane, java.awt.BorderLayout.PAGE_END);
@@ -137,6 +154,27 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
         platformPane.add(platformButtonPane, java.awt.BorderLayout.PAGE_END);
 
         gsmContentTabbedPane.addTab("Platforms", platformPane);
+
+        groupsPane.setLayout(new java.awt.BorderLayout());
+
+        jList1.setModel(new javax.swing.AbstractListModel() {
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            public int getSize() { return strings.length; }
+            public Object getElementAt(int i) { return strings[i]; }
+        });
+        jScrollPane1.setViewportView(jList1);
+
+        groupsPane.add(jScrollPane1, java.awt.BorderLayout.CENTER);
+
+        viewGroupBtn.setText("  View  ");
+        jPanel1.add(viewGroupBtn);
+
+        importGroupBtn.setText(" Import ");
+        jPanel1.add(importGroupBtn);
+
+        groupsPane.add(jPanel1, java.awt.BorderLayout.PAGE_END);
+
+        gsmContentTabbedPane.addTab("Groups", groupsPane);
 
         leftPane.setBottomComponent(gsmContentTabbedPane);
 
@@ -196,7 +234,7 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
         gridBagConstraints.weighty = 1.0;
         gsmInfoPane.add(metadataWrapperPane, gridBagConstraints);
 
-        namePane.setFont(new java.awt.Font("DejaVu Serif", 1, 18)); // NOI18N
+        namePane.setFont(new java.awt.Font("DejaVu Serif", 1, 18));
 
         nameLbl.setText(org.genmapp.expressionreader.ExpressionReaderUtil.getSoftNameLblText(soft));
         namePane.add(nameLbl);
@@ -248,6 +286,24 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
         ExpressionReaderUtil.openURL(url);
     }//GEN-LAST:event_viewInBroswerBtnActionPerformed
 
+    private void importSampleBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importSampleBtnActionPerformed
+        String gsmId = (String)sampleList.getSelectedValue();
+        if (gsmId != null && !"".equals(gsmId)) {
+            SOFTDownloadTask task = new SOFTDownloadTask(gsmId, new SOFTViewer() {
+
+                public void viewSOFT(SOFT soft) {
+                    GSMImportDialog dialog = new GSMImportDialog(Cytoscape.getDesktop(), true, soft);
+                    dialog.setVisible(true);
+                }
+
+                public void closeView(SOFT soft) {
+                    // do nothing
+                }
+            }, SOFT.Format.full);
+            TaskManager.executeTask(task, task.getDefaultTaskConfig());
+        }
+    }//GEN-LAST:event_importSampleBtnActionPerformed
+
     /**
     * @param args the command line arguments
     */
@@ -276,12 +332,10 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
                     });
                     dialog.setVisible(true);
                 } catch (Exception ex) {
-                    Logger.getLogger(SOFTViewerDialog.class.getName()).log(Level.SEVERE, null, ex);
                 } finally {
                     try {
                         in.close();
                     } catch (IOException ex) {
-                        Logger.getLogger(SOFTViewerDialog.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
 
@@ -292,9 +346,15 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addToGruopBtn;
     private javax.swing.JSplitPane contentSplitPane;
+    private javax.swing.JPanel groupsPane;
     private javax.swing.JTabbedPane gsmContentTabbedPane;
     private javax.swing.JPanel gsmInfoPane;
     private javax.swing.JTabbedPane htmlViewerTabbedPane;
+    private javax.swing.JButton importGroupBtn;
+    private javax.swing.JButton importSampleBtn;
+    private javax.swing.JList jList1;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSplitPane leftPane;
     private javax.swing.JScrollPane metadataScrollPane;
     private javax.swing.JTable metadataTable;
@@ -310,12 +370,15 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
     private javax.swing.JPanel samplePane;
     private javax.swing.JScrollPane sampleScrollPane;
     private javax.swing.JButton viewBtn;
+    private javax.swing.JButton viewGroupBtn;
     private javax.swing.JButton viewInBroswerBtn;
     private javax.swing.JPanel viewInBrowserPane;
     // End of variables declaration//GEN-END:variables
 
     public void viewSOFT(SOFT soft) {
-        SOFTViewerPane pane = new SOFTViewerPane(soft, this);
+        SOFTViewerPane pane = new SOFTViewerPane();
+        pane.setOwner(this);
+        pane.setSoft(soft);
         htmlViewerTabbedPane.add(soft.getId(), pane);
         htmlViewerTabbedPane.setSelectedComponent(pane);
     }

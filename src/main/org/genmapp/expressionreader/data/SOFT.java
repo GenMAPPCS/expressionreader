@@ -18,8 +18,10 @@ public class SOFT {
         GSM, GSE, GPL, GDS
     }
 
+    private String typeStr;
+
     public enum Format {
-        full, brief, quick, data
+        full, brief, quick, data, family
     }
 
     private LinkedHashMap<String, Object> fields;
@@ -107,4 +109,14 @@ public class SOFT {
     public void setId(String id) {
         this.id = id;
     }
+
+
+    public String getTypeStr() {
+        return typeStr;
+    }
+
+    public void setTypeStr(String typeStr) {
+        this.typeStr = typeStr;
+    }
+
 }

@@ -6,6 +6,7 @@ import org.genmapp.expressionreader.ExpressionReaderUtil;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.util.zip.GZIPInputStream;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -59,7 +60,7 @@ public class SOFTParserTest {
         URL url = new URL(String.format(ExpressionReaderUtil.GEO_URL, "GSM11805", "text", SOFT.Format.quick));
 
         InputStream gplIn = url.openConnection().getInputStream();
-        SOFT gsm = new SOFTParser().parseSOFT(gplIn, SOFT.Type.GSM);
+        SOFT gsm = new SOFTParser().parseSOFT(gplIn, SOFT.Type.GSM, SOFT.Format.quick);
         if (gplIn != null) {
             gplIn.close();
         }
@@ -68,7 +69,7 @@ public class SOFTParserTest {
         assertEquals("617-414-1646", gsm.getFields().get("Sample_contact_fax"));
 
         assertEquals(3, gsm.getDataTables().getFirst().getHeaders().keySet().size());
-
+/*
         url = new URL(String.format(ExpressionReaderUtil.GEO_URL, "GSM11805", "text", SOFT.Format.full));
 
         gplIn = url.openConnection().getInputStream();
@@ -77,6 +78,8 @@ public class SOFTParserTest {
             gplIn.close();
         }
         assertEquals(22283, gsm.getDataTables().getFirst().getData().size());
+
+ */
     }
 
     /**
@@ -111,5 +114,36 @@ public class SOFTParserTest {
 
         // Show the list of fields to let people to map to column
         assertEquals(6, soft.getDataTables().size());
+    }
+
+    /**
+     * Test method for {@link geReader.SOFTParser#parseSOFT(java.io.InputStream, geReader.data.SOFT.Type)}.
+     */
+    @Test
+    public void testParseGSEFamily() throws Exception {
+        URL url = new URL(String.format(ExpressionReaderUtil.GSE_FTP, "GSE9914"));
+
+        InputStream in = url.openConnection().getInputStream();
+        SOFT soft = new SOFTParser().parseSOFT(new GZIPInputStream(in), SOFT.Type.GSE, SOFT.Format.family);
+        if (in != null) {
+            in.close();
+        }
+
+        // Show the list of fields to let people to map to column
+        assertEquals(6, soft.getDataTables().size());
+    }
+
+    @Test
+    public void testParseGDS() throws Exception {
+        URL url = new URL(String.format(ExpressionReaderUtil.GDS_FTP, "GDS507"));
+
+        InputStream in = url.openConnection().getInputStream();
+        SOFT soft = new SOFTParser().parseSOFT(new GZIPInputStream(in), SOFT.Type.GDS);
+        if (in != null) {
+            in.close();
+        }
+
+        // Show the list of fields to let people to map to column
+        assertEquals(1, soft.getDataTables().size());
     }
 }
