@@ -23,9 +23,11 @@ import gov.nih.nlm.ncbi.soap.eutils.esummary.DocSumType;
 import gov.nih.nlm.ncbi.soap.eutils.esummary.ESummaryRequest;
 import gov.nih.nlm.ncbi.soap.eutils.esummary.ESummaryResult;
 import gov.nih.nlm.ncbi.soap.eutils.esummary.ItemType;
+import java.awt.Dimension;
 import java.util.List;
 import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableColumn;
 import org.genmapp.expressionreader.ExpressionReaderUtil;
 import org.genmapp.expressionreader.data.SOFT;
 import org.genmapp.expressionreader.tasks.AbstractTask;
@@ -106,6 +108,7 @@ public class GEOSearchDialog extends javax.swing.JDialog {
 
         jPanel1.setLayout(new java.awt.BorderLayout());
 
+        resultTable.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_LAST_COLUMN);
         resultTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         resultScrollPane.setViewportView(resultTable);
 
@@ -183,7 +186,7 @@ public class GEOSearchDialog extends javax.swing.JDialog {
                         totalLbl.setText("Of " + totalPages);
 
                         prevBtn.setEnabled(page != 0);
-                        nextBtn.setEnabled(page != totalPages);
+                        nextBtn.setEnabled((page + 1) != totalPages);
 
                         resultTable.setModel(new AbstractTableModel() {
                             
@@ -223,6 +226,11 @@ public class GEOSearchDialog extends javax.swing.JDialog {
                                 }
                             }
                         });
+                        Dimension tableDim = resultTable.getPreferredSize();
+                        TableColumn column = resultTable.getColumnModel().getColumn(0);
+                        column.setPreferredWidth((int) (tableDim.width * 0.2));
+                        column = resultTable.getColumnModel().getColumn(1);
+                        column.setPreferredWidth((int) (tableDim.width * 0.8));
                     }
                 });
             }
@@ -273,6 +281,8 @@ public class GEOSearchDialog extends javax.swing.JDialog {
                             GDSViewerDialog dialog = new GDSViewerDialog(Cytoscape.getDesktop(), true);
                             dialog.setSOFT(soft);
                             dialog.setVisible(true);
+                        } else if (soft.getType() == SOFT.Type.GPL) {
+                            ExpressionReaderUtil.showSOFTViewerDialog(Cytoscape.getDesktop(), true, soft);
                         }
                     }
 

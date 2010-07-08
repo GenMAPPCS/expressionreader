@@ -10,6 +10,7 @@ import cytoscape.Cytoscape;
 import cytoscape.task.ui.JTaskConfig;
 import cytoscape.task.util.TaskManager;
 import cytoscape.util.CytoscapeAction;
+import org.genmapp.expressionreader.ExpressionReaderUtil;
 import org.genmapp.expressionreader.data.SOFT.Format;
 import org.genmapp.expressionreader.tasks.SOFTDownloadTask;
 import org.genmapp.expressionreader.ui.GDSViewerDialog;
@@ -51,6 +52,8 @@ public class GEOImportAction extends CytoscapeAction implements SOFTViewer {
             GDSViewerDialog dialog = new GDSViewerDialog(Cytoscape.getDesktop(), true);
             dialog.setSOFT(soft);
             dialog.setVisible(true);
+        } else if (soft.getType() == SOFT.Type.GPL) {
+            ExpressionReaderUtil.showSOFTViewerDialog(Cytoscape.getDesktop(), true, soft);
         }
     }
 

@@ -1,5 +1,8 @@
 package org.genmapp.expressionreader;
 
+import java.awt.Container;
+import java.awt.Frame;
+import java.awt.event.WindowEvent;
 import org.genmapp.expressionreader.data.SOFT;
 import org.genmapp.expressionreader.parser.SOFTParser;
 import java.io.BufferedInputStream;
@@ -21,7 +24,11 @@ import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import javax.swing.JDialog;
 import javax.swing.JOptionPane;
+import javax.swing.WindowConstants;
+import org.genmapp.expressionreader.ui.SOFTViewer;
+import org.genmapp.expressionreader.ui.SOFTViewerPane;
 
 /**
  *
@@ -281,5 +288,34 @@ public class ExpressionReaderUtil {
             }
             return soft;
         }
+    }
+
+    public static JDialog showSOFTViewerDialog(Container parent, boolean modal, SOFT soft) {
+        JDialog dialog = null;
+        if (parent instanceof Frame) {
+            dialog = new JDialog((Frame) parent, modal);
+        } else if (parent instanceof JDialog) {
+            dialog = new JDialog((JDialog)parent, modal);
+        }
+
+        if (dialog == null) return null;
+        final JDialog fdialog = dialog;
+        SOFTViewerPane pane = new SOFTViewerPane();
+        pane.setSoft(soft);
+        dialog.setContentPane(pane);
+        dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        pane.setOwner(new SOFTViewer() {
+
+            public void viewSOFT(SOFT soft) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            public void closeView(SOFT soft) {
+                fdialog.dispose();
+            }
+        });
+        dialog.setSize(600, 760);
+        dialog.setVisible(true);
+        return dialog;
     }
 }

@@ -441,23 +441,7 @@ public class GSMImportDialog extends javax.swing.JDialog implements SOFTViewer {
     }//GEN-LAST:event_viewInBrowserBtnActionPerformed
 
     private void viewSampleDataBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewSampleDataBtnActionPerformed
-        final JDialog self = this;
-        SOFTViewer viewer = new SOFTViewer() {
-            JDialog dialog = null;
-            public void viewSOFT(SOFT soft) {
-                dialog = new JDialog(self);
-                SOFTViewerPane pane = new SOFTViewerPane();
-                dialog.setContentPane(pane);
-                pane.setSoft(soft);
-                dialog.setSize(600, 760);
-                dialog.setVisible(true);
-            }
-
-            public void closeView(SOFT soft) {
-                dialog.dispose();
-            }
-        };
-        viewer.viewSOFT(soft);
+        ExpressionReaderUtil.showSOFTViewerDialog(this, false, soft);
     }//GEN-LAST:event_viewSampleDataBtnActionPerformed
     private void idMapConfigBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_idMapConfigBtnActionPerformed
         boolean result = client.openMappingResourceConfigDialog();
@@ -476,27 +460,7 @@ public class GSMImportDialog extends javax.swing.JDialog implements SOFTViewer {
             JTaskConfig config = task.getDefaultTaskConfig();
             TaskManager.executeTask(task, config);
         } else if ("View GPL Data".equals(evt.getActionCommand())) {
-            if (soft.getType() == SOFT.Type.GSM) {
-                final JDialog self = this;
-                SOFTViewer viewer = new SOFTViewer() {
-
-                    JDialog dialog = null;
-
-                    public void viewSOFT(SOFT soft) {
-                        dialog = new JDialog(self);
-                        SOFTViewerPane pane = new SOFTViewerPane();
-                        dialog.setContentPane(pane);
-                        pane.setSoft(soft);
-                        dialog.setSize(600, 760);
-                        dialog.setVisible(true);
-                    }
-
-                    public void closeView(SOFT soft) {
-                        dialog.dispose();
-                    }
-                };
-                viewer.viewSOFT(this.gpl);
-            }
+            ExpressionReaderUtil.showSOFTViewerDialog(this, false, soft);
         }
     }//GEN-LAST:event_importGPLBtnActionPerformed
 

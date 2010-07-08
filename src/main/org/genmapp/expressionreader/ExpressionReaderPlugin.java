@@ -40,7 +40,7 @@ public class ExpressionReaderPlugin extends CytoscapePlugin {
         try {
             geoMenu.add(new GEOImportAction());
             geoMenu.add(new GEOSearchAction());
-            geReaderMenu.add(new ArrayExpressionImportAction());
+//            geReaderMenu.add(new ArrayExpressionImportAction());
         } catch (Exception e) {
             logger.error("Unable to initialize menus: " + e.getMessage(), e);
         }
