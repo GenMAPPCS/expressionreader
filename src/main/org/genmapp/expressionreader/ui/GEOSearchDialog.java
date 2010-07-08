@@ -11,7 +11,6 @@
 
 package org.genmapp.expressionreader.ui;
 
-import corejava.Format;
 import cytoscape.Cytoscape;
 import cytoscape.task.Task;
 import cytoscape.task.ui.JTaskConfig;
@@ -25,7 +24,6 @@ import gov.nih.nlm.ncbi.soap.eutils.esummary.ESummaryRequest;
 import gov.nih.nlm.ncbi.soap.eutils.esummary.ESummaryResult;
 import gov.nih.nlm.ncbi.soap.eutils.esummary.ItemType;
 import java.util.List;
-import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
 import org.genmapp.expressionreader.ExpressionReaderUtil;
@@ -46,6 +44,7 @@ public class GEOSearchDialog extends javax.swing.JDialog {
     /** Creates new form GEOSearchDialog */
     public GEOSearchDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
+        this.setLocationRelativeTo(parent);
         initComponents();
     }
 
@@ -169,21 +168,12 @@ public class GEOSearchDialog extends javax.swing.JDialog {
                 total = Integer.parseInt(result.getCount());
                 String ids = ExpressionReaderUtil.join(result.getIdList().getId(), ",");
 
-                System.out.println(String.format("Total: %d, IDS: %s", total, ids));
-
                 ESummaryRequest req = new ESummaryRequest();
                 req.setDb("gds");
                 req.setId(ids);
 
                 ESummaryResult res = clientStub.runESummary(req);
                 final List<DocSumType> docsum = res.getDocSum();
-                for (DocSumType ds : docsum) {
-                    List<ItemType> items = ds.getItem();
-                    for (ItemType item: items) {
-                        System.out.println("   " + item.getName() + ": " + item.getItemContent());
-                    }
-                    System.out.println("--------------------------------");
-                }
 
                 SwingUtilities.invokeLater(new Runnable() {
 
@@ -195,8 +185,6 @@ public class GEOSearchDialog extends javax.swing.JDialog {
                         prevBtn.setEnabled(page != 0);
                         nextBtn.setEnabled(page != totalPages);
 
-                        // populate result list
-                        //System.out.println(result.getCount());
                         resultTable.setModel(new AbstractTableModel() {
                             
                             @Override

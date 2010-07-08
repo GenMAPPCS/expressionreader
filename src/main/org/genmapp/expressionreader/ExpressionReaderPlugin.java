@@ -9,6 +9,7 @@ import cytoscape.Cytoscape;
 import cytoscape.logger.CyLogger;
 import cytoscape.plugin.CytoscapePlugin;
 import cytoscape.view.CytoscapeDesktop;
+import org.genmapp.expressionreader.actions.GEOSearchAction;
 
 /**
  * This plugin reads gene expression data from GEO and ArrayExpress
@@ -33,9 +34,12 @@ public class ExpressionReaderPlugin extends CytoscapePlugin {
         JMenu pluginMenu = Cytoscape.getDesktop().getCyMenus().getOperationsMenu();
         JMenu geReaderMenu = new JMenu("Gene Expression Reader");
         pluginMenu.add(geReaderMenu);
+        JMenu geoMenu = new JMenu("GEO");
+        geReaderMenu.add(geoMenu);
 
         try {
-            geReaderMenu.add(new GEOImportAction());
+            geoMenu.add(new GEOImportAction());
+            geoMenu.add(new GEOSearchAction());
             geReaderMenu.add(new ArrayExpressionImportAction());
         } catch (Exception e) {
             logger.error("Unable to initialize menus: " + e.getMessage(), e);

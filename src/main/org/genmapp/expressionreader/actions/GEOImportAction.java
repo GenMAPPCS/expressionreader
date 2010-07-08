@@ -22,7 +22,7 @@ public class GEOImportAction extends CytoscapeAction implements SOFTViewer {
     private static final long serialVersionUID = 1128930960050800232L;
 
     public GEOImportAction() {
-        super("GEO");
+        super("Import");
     }
 
     @Override
