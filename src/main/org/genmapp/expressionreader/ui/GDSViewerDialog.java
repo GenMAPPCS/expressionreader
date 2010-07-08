@@ -11,11 +11,22 @@
 
 package org.genmapp.expressionreader.ui;
 
+import java.io.InputStream;
+import java.net.URL;
+import java.util.List;
+import java.util.zip.GZIPInputStream;
+import org.genmapp.expressionreader.ExpressionReaderUtil;
+import org.genmapp.expressionreader.data.GDS;
+import org.genmapp.expressionreader.data.SOFT;
+import org.genmapp.expressionreader.parser.SOFTParser;
+
 /**
  *
  * @author djiao
  */
 public class GDSViewerDialog extends javax.swing.JDialog {
+
+    private GDS gds;
 
     /** Creates new form GDSViewerDialog */
     public GDSViewerDialog(java.awt.Frame parent, boolean modal) {
@@ -33,11 +44,16 @@ public class GDSViewerDialog extends javax.swing.JDialog {
     private void initComponents() {
 
         jSplitPane1 = new javax.swing.JSplitPane();
-        sOFTViewerPane1 = new org.genmapp.expressionreader.ui.SOFTViewerPane();
+        softViewerPane = new org.genmapp.expressionreader.ui.SOFTViewerPane();
+        subsetTabbedPane = new javax.swing.JTabbedPane();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
-        jSplitPane1.setLeftComponent(sOFTViewerPane1);
+        jSplitPane1.setLeftComponent(softViewerPane);
+
+        subsetTabbedPane.setMinimumSize(new java.awt.Dimension(320, 420));
+        subsetTabbedPane.setPreferredSize(new java.awt.Dimension(420, 420));
+        jSplitPane1.setRightComponent(subsetTabbedPane);
 
         getContentPane().add(jSplitPane1, java.awt.BorderLayout.CENTER);
 
@@ -47,7 +63,8 @@ public class GDSViewerDialog extends javax.swing.JDialog {
     /**
     * @param args the command line arguments
     */
-    public static void main(String args[]) {
+    public static void main(String args[]) throws Exception {
+        final SOFT soft = ExpressionReaderUtil.getSOFT("GDS507", SOFT.Type.GDS, SOFT.Format.full);
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 GDSViewerDialog dialog = new GDSViewerDialog(new javax.swing.JFrame(), true);
@@ -56,6 +73,7 @@ public class GDSViewerDialog extends javax.swing.JDialog {
                         System.exit(0);
                     }
                 });
+                dialog.setSOFT(soft);
                 dialog.setVisible(true);
             }
         });
@@ -63,7 +81,23 @@ public class GDSViewerDialog extends javax.swing.JDialog {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JSplitPane jSplitPane1;
-    private org.genmapp.expressionreader.ui.SOFTViewerPane sOFTViewerPane1;
+    private org.genmapp.expressionreader.ui.SOFTViewerPane softViewerPane;
+    private javax.swing.JTabbedPane subsetTabbedPane;
     // End of variables declaration//GEN-END:variables
 
+    public void setSOFT(SOFT soft) {
+        if (soft.getType() == SOFT.Type.GDS) {
+            this.gds = (GDS)soft;
+            this.softViewerPane.setSoft(soft);
+
+            List<SOFT> subsets = gds.getSubsets();
+            for (SOFT subset : subsets) {
+                GDSSubsetViewerPane pane = new GDSSubsetViewerPane();
+                pane.setSOFT(subset);
+                this.subsetTabbedPane.add(pane, subset.getId());
+            }
+        } else {
+            throw new RuntimeException("Wrong SOFT type");
+        }
+    }
 }

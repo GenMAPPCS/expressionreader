@@ -6,12 +6,6 @@
 
 package org.genmapp.expressionreader.ui;
 
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTable;
 import org.genmapp.expressionreader.data.SOFT;
 import org.genmapp.expressionreader.ExpressionReaderUtil;
 import java.util.ArrayList;
@@ -54,7 +48,7 @@ public class SOFTViewerPane extends javax.swing.JPanel {
         int numOfRows = total > 20 ? 20 : total;
             TitledBorder border = (TitledBorder)dataWrapperPane.getBorder();
         if (soft.getType() == SOFT.Type.GSM) {
-            border.setTitle(String.format("Data (%d rows; displaying top %d)", soft.getFields().get("Sample_data_row_count"), numOfRows));
+            border.setTitle(String.format("Data (%s rows; displaying top %d)", soft.getFields().get("Sample_data_row_count"), numOfRows));
         } else {
             border.setTitle(String.format("Data (%d rows; displaying top %d)", total, numOfRows));
         }
@@ -169,7 +163,7 @@ public class SOFTViewerPane extends javax.swing.JPanel {
         });
         viewInBrowserPane.add(viewInBrowserBtn);
 
-        closeButton.setText("Close Sample");
+        closeButton.setText(" Close ");
         closeButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 closeButtonActionPerformed(evt);
@@ -255,101 +249,4 @@ public class SOFTViewerPane extends javax.swing.JPanel {
     private javax.swing.JButton viewInBrowserBtn;
     private javax.swing.JPanel viewInBrowserPane;
     // End of variables declaration//GEN-END:variables
-
-    public JButton getCloseButton() {
-        return closeButton;
-    }
-
-    public void setCloseButton(JButton closeButton) {
-        this.closeButton = closeButton;
-    }
-
-    public JScrollPane getDataScrollPane() {
-        return dataScrollPane;
-    }
-
-    public void setDataScrollPane(JScrollPane dataScrollPane) {
-        this.dataScrollPane = dataScrollPane;
-    }
-
-    public JTable getDataTable() {
-        return dataTable;
-    }
-
-    public void setDataTable(JTable dataTable) {
-        this.dataTable = dataTable;
-    }
-
-    public JPanel getDataWrapperPane() {
-        return dataWrapperPane;
-    }
-
-    public void setDataWrapperPane(JPanel dataWrapperPane) {
-        this.dataWrapperPane = dataWrapperPane;
-    }
-
-    public JSplitPane getjSplitPane1() {
-        return jSplitPane1;
-    }
-
-    public void setjSplitPane1(JSplitPane jSplitPane1) {
-        this.jSplitPane1 = jSplitPane1;
-    }
-
-    public JScrollPane getMetadataScrollPane() {
-        return metadataScrollPane;
-    }
-
-    public void setMetadataScrollPane(JScrollPane metadataScrollPane) {
-        this.metadataScrollPane = metadataScrollPane;
-    }
-
-    public JTable getMetadataTable() {
-        return metadataTable;
-    }
-
-    public void setMetadataTable(JTable metadataTable) {
-        this.metadataTable = metadataTable;
-    }
-
-    public JPanel getMetadataWrapperPane() {
-        return metadataWrapperPane;
-    }
-
-    public void setMetadataWrapperPane(JPanel metadataWrapperPane) {
-        this.metadataWrapperPane = metadataWrapperPane;
-    }
-
-    public JLabel getSampleNameLbl() {
-        return sampleNameLbl;
-    }
-
-    public void setSampleNameLbl(JLabel sampleNameLbl) {
-        this.sampleNameLbl = sampleNameLbl;
-    }
-
-    public JPanel getSampleNamePane() {
-        return sampleNamePane;
-    }
-
-    public void setSampleNamePane(JPanel sampleNamePane) {
-        this.sampleNamePane = sampleNamePane;
-    }
-
-    public JButton getViewInBrowserBtn() {
-        return viewInBrowserBtn;
-    }
-
-    public void setViewInBrowserBtn(JButton viewInBrowserBtn) {
-        this.viewInBrowserBtn = viewInBrowserBtn;
-    }
-
-    public JPanel getViewInBrowserPane() {
-        return viewInBrowserPane;
-    }
-
-    public void setViewInBrowserPane(JPanel viewInBrowserPane) {
-        this.viewInBrowserPane = viewInBrowserPane;
-    }
-
 }
