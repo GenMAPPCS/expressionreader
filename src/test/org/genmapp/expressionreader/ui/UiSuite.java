@@ -1,0 +1,39 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+package org.genmapp.expressionreader.ui;
+
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+
+/**
+ *
+ * @author djiao
+ */
+@RunWith(Suite.class)
+@Suite.SuiteClasses({org.genmapp.expressionreader.ui.GEOSearchDialogTest.class,org.genmapp.expressionreader.ui.GDSViewerDialogTest.class,org.genmapp.expressionreader.ui.SOFTViewerPaneTest.class,org.genmapp.expressionreader.ui.GSMImportDialogTest.class,org.genmapp.expressionreader.ui.PaginationTablePaneTest.class,org.genmapp.expressionreader.ui.SOFTViewerTest.class,org.genmapp.expressionreader.ui.GDSSubsetViewerPaneTest.class,org.genmapp.expressionreader.ui.GSEViewerDialogTest.class})
+public class UiSuite {
+
+    @BeforeClass
+    public static void setUpClass() throws Exception {
+    }
+
+    @AfterClass
+    public static void tearDownClass() throws Exception {
+    }
+
+    @Before
+    public void setUp() throws Exception {
+    }
+
+    @After
+    public void tearDown() throws Exception {
+    }
+
+}

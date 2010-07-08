@@ -5,6 +5,7 @@
 
 package org.genmapp.expressionreader;
 
+import java.util.List;
 import org.genmapp.expressionreader.data.GDS;
 import org.genmapp.expressionreader.data.SOFT;
 import java.io.File;
@@ -57,6 +58,76 @@ public class ExpressionReaderUtilTest {
 
         SOFT gsm = (SOFT)ExpressionReaderUtil.getSOFT("GSM11805", Type.GSM, SOFT.Format.quick);
         assertEquals(22283, gsm.getDataTables().getFirst().getData().size());
+    }
+
+    /**
+     * Test of downloadURL method, of class ExpressionReaderUtil.
+     */
+    @Test
+    public void testDownloadURL() {
+        System.out.println("downloadURL");
+        String urlStr = "";
+        File file = null;
+        boolean expResult = false;
+        boolean result = ExpressionReaderUtil.downloadURL(urlStr, file);
+        assertEquals(expResult, result);
+        // TODO review the generated test code and remove the default call to fail.
+        fail("The test case is a prototype.");
+    }
+
+    /**
+     * Test of openURL method, of class ExpressionReaderUtil.
+     */
+    @Test
+    public void testOpenURL() {
+        System.out.println("openURL");
+        String url = "";
+        ExpressionReaderUtil.openURL(url);
+        // TODO review the generated test code and remove the default call to fail.
+        fail("The test case is a prototype.");
+    }
+
+    /**
+     * Test of join method, of class ExpressionReaderUtil.
+     */
+    @Test
+    public void testJoin() {
+        System.out.println("join");
+        List<? extends CharSequence> s = null;
+        String delimiter = "";
+        String expResult = "";
+        String result = ExpressionReaderUtil.join(s, delimiter);
+        assertEquals(expResult, result);
+        // TODO review the generated test code and remove the default call to fail.
+        fail("The test case is a prototype.");
+    }
+
+    /**
+     * Test of getSoftNameLblText method, of class ExpressionReaderUtil.
+     */
+    @Test
+    public void testGetSoftNameLblText() {
+        System.out.println("getSoftNameLblText");
+        SOFT soft = null;
+        String expResult = "";
+        String result = ExpressionReaderUtil.getSoftNameLblText(soft);
+        assertEquals(expResult, result);
+        // TODO review the generated test code and remove the default call to fail.
+        fail("The test case is a prototype.");
+    }
+
+    /**
+     * Test of getType method, of class ExpressionReaderUtil.
+     */
+    @Test
+    public void testGetType() {
+        System.out.println("getType");
+        String geoId = "";
+        Type expResult = null;
+        Type result = ExpressionReaderUtil.getType(geoId);
+        assertEquals(expResult, result);
+        // TODO review the generated test code and remove the default call to fail.
+        fail("The test case is a prototype.");
     }
 
 }
