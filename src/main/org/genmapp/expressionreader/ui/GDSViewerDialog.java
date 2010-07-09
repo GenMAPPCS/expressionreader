@@ -11,6 +11,7 @@
 
 package org.genmapp.expressionreader.ui;
 
+import org.genmapp.expressionreader.tasks.SOFTViewer; 
 import java.util.List;
 import org.genmapp.expressionreader.ExpressionReaderUtil;
 import org.genmapp.expressionreader.data.GDS;
@@ -61,7 +62,7 @@ public class GDSViewerDialog extends javax.swing.JDialog implements SOFTViewer {
     * @param args the command line arguments
     */
     public static void main(String args[]) throws Exception {
-        final SOFT soft = ExpressionReaderUtil.getSOFT("GDS507", SOFT.Type.GDS, SOFT.Format.full);
+        final SOFT soft = ExpressionReaderUtil.getGDS("GDS507");
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 GDSViewerDialog dialog = new GDSViewerDialog(new javax.swing.JFrame(), true);

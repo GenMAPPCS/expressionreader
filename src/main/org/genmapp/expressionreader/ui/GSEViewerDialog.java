@@ -11,21 +11,20 @@
 
 package org.genmapp.expressionreader.ui;
 
+import org.genmapp.expressionreader.tasks.SOFTViewer;
 import cytoscape.Cytoscape;
 import cytoscape.task.ui.JTaskConfig;
 import cytoscape.task.util.TaskManager;
 import org.genmapp.expressionreader.data.SOFT;
 import org.genmapp.expressionreader.ExpressionReaderUtil;
 import org.genmapp.expressionreader.tasks.SOFTDownloadTask;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import javax.swing.AbstractListModel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.border.TitledBorder;
 import javax.swing.table.AbstractTableModel;
 import org.genmapp.expressionreader.data.DataTable;
 import org.genmapp.expressionreader.data.GSE;
@@ -176,14 +175,14 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
         gsmContentTabbedPane = new javax.swing.JTabbedPane();
         samplePane = new javax.swing.JPanel();
         sampleButtonPane = new javax.swing.JPanel();
-        viewBtn = new javax.swing.JButton();
+        viewSampleBtn = new javax.swing.JButton();
         importSampleBtn = new javax.swing.JButton();
         addToGruopBtn = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         sampleTable = new javax.swing.JTable();
         platformPane = new javax.swing.JPanel();
         platformButtonPane = new javax.swing.JPanel();
-        gplViewBtn = new javax.swing.JButton();
+        viewPlatformBtn = new javax.swing.JButton();
         jScrollPane3 = new javax.swing.JScrollPane();
         platformTable = new javax.swing.JTable();
         groupsPane = new javax.swing.JPanel();
@@ -213,13 +212,13 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
 
         samplePane.setLayout(new java.awt.BorderLayout());
 
-        viewBtn.setText("  View  ");
-        viewBtn.addActionListener(new java.awt.event.ActionListener() {
+        viewSampleBtn.setText("  View  ");
+        viewSampleBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                viewBtnActionPerformed(evt);
+                viewSampleBtnActionPerformed(evt);
             }
         });
-        sampleButtonPane.add(viewBtn);
+        sampleButtonPane.add(viewSampleBtn);
 
         importSampleBtn.setText(" Import ");
         importSampleBtn.addActionListener(new java.awt.event.ActionListener() {
@@ -235,6 +234,11 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
 
         samplePane.add(sampleButtonPane, java.awt.BorderLayout.PAGE_END);
 
+        sampleTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                sampleTableMouseClicked(evt);
+            }
+        });
         jScrollPane2.setViewportView(sampleTable);
 
         samplePane.add(jScrollPane2, java.awt.BorderLayout.CENTER);
@@ -243,16 +247,21 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
 
         platformPane.setLayout(new java.awt.BorderLayout());
 
-        gplViewBtn.setText("  View  ");
-        gplViewBtn.addActionListener(new java.awt.event.ActionListener() {
+        viewPlatformBtn.setText("  View  ");
+        viewPlatformBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                gplViewBtnActionPerformed(evt);
+                viewPlatformBtnActionPerformed(evt);
             }
         });
-        platformButtonPane.add(gplViewBtn);
+        platformButtonPane.add(viewPlatformBtn);
 
         platformPane.add(platformButtonPane, java.awt.BorderLayout.PAGE_END);
 
+        platformTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                platformTableMouseClicked(evt);
+            }
+        });
         jScrollPane3.setViewportView(platformTable);
 
         platformPane.add(jScrollPane3, java.awt.BorderLayout.CENTER);
@@ -280,6 +289,11 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
 
         groupsPane.add(jPanel1, java.awt.BorderLayout.PAGE_END);
 
+        groupList.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                groupListMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(groupList);
 
         groupsPane.add(jScrollPane1, java.awt.BorderLayout.CENTER);
@@ -343,16 +357,16 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void viewBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewBtnActionPerformed
+    private void viewSampleBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewSampleBtnActionPerformed
         int[] rows = sampleTable.getSelectedRows();
         String[] ids = new String[rows.length];
         for (int i = 0; i < rows.length; i++) {
             ids[i] = (String)sampleTable.getModel().getValueAt(rows[i], 0);
         }
-        SOFTDownloadTask task = new SOFTDownloadTask(ids, this);
+        SOFTDownloadTask task = new SOFTDownloadTask(ids, this, SOFT.Format.quick);
         JTaskConfig config = task.getDefaultTaskConfig();
         boolean success = TaskManager.executeTask(task, config);
-    }//GEN-LAST:event_viewBtnActionPerformed
+    }//GEN-LAST:event_viewSampleBtnActionPerformed
 
     private void viewInBroswerBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewInBroswerBtnActionPerformed
         String url = String.format(ExpressionReaderUtil.GEO_URL, soft.getId(), "html", SOFT.Format.quick);
@@ -377,32 +391,32 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
                 public void closeView(SOFT soft) {
                     // do nothing
                 }
-            });
+            }, SOFT.Format.full);
             TaskManager.executeTask(task, task.getDefaultTaskConfig());
         }
     }//GEN-LAST:event_importSampleBtnActionPerformed
 
-    private void gplViewBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_gplViewBtnActionPerformed
+    private void viewPlatformBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewPlatformBtnActionPerformed
         int[] rows = platformTable.getSelectedRows();
         String[] ids = new String[rows.length];
         for (int i = 0; i < rows.length; i++) {
             ids[i] = (String)platformTable.getModel().getValueAt(rows[i], 0);
         }
-        SOFTDownloadTask task = new SOFTDownloadTask(ids, this);
+        SOFTDownloadTask task = new SOFTDownloadTask(ids, this, SOFT.Format.quick);
         JTaskConfig config = task.getDefaultTaskConfig();
         boolean success = TaskManager.executeTask(task, config);
-    }//GEN-LAST:event_gplViewBtnActionPerformed
+    }//GEN-LAST:event_viewPlatformBtnActionPerformed
 
     private void viewGroupBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewGroupBtnActionPerformed
         final int index = groupList.getSelectedIndex();
         if (index < 0) return;
-
+        final DataTable dt = soft.getDataTables().get(index);
         String id = soft.getDataTables().get(index).getTitle();
         if ( sampleTabbedPane.indexOfTab(id) < 0) {
             JTable table = new JTable();
             table.setModel(new AbstractTableModel() {
 
-                DataTable dt = soft.getDataTables().get(index);
+
                 List<String> keys = new ArrayList<String>(dt.getData().keySet());
                 public int getRowCount() {
                     return dt.getData().size();
@@ -422,6 +436,7 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
                 }
             });
             JScrollPane pane = new JScrollPane(table);
+            pane.setBorder(new TitledBorder("Total Records Unknown. Showing only top " + dt.getData().size()));
             sampleTabbedPane.add(id, pane);
             sampleTabbedPane.setSelectedComponent(pane);
         } else {
@@ -433,6 +448,24 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
         // TODO add your handling code here:
     }//GEN-LAST:event_importGroupBtnActionPerformed
 
+    private void sampleTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_sampleTableMouseClicked
+        if (evt.getClickCount() == 2) {
+            viewSampleBtnActionPerformed(null);
+        }
+    }//GEN-LAST:event_sampleTableMouseClicked
+
+    private void platformTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_platformTableMouseClicked
+        if (evt.getClickCount() == 2) {
+            viewPlatformBtnActionPerformed(null);
+        }
+    }//GEN-LAST:event_platformTableMouseClicked
+
+    private void groupListMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_groupListMouseClicked
+        if (evt.getClickCount() == 2) {
+            viewGroupBtnActionPerformed(null);
+        }
+    }//GEN-LAST:event_groupListMouseClicked
+
     /**
     * @param args the command line arguments
     */
@@ -440,7 +473,7 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 try {
-                    SOFT gse = ExpressionReaderUtil.getSOFT("GSE9914", SOFT.Type.GSE, SOFT.Format.family);
+                    SOFT gse = ExpressionReaderUtil.getGSE("GSE9914", SOFT.Format.quick);
 
                     GSEViewerDialog dialog = new GSEViewerDialog(new javax.swing.JFrame(), true);
                     dialog.setSOFT(gse);
@@ -462,7 +495,6 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addToGruopBtn;
     private javax.swing.JSplitPane contentSplitPane;
-    private javax.swing.JButton gplViewBtn;
     private javax.swing.JList groupList;
     private javax.swing.JPanel groupsPane;
     private javax.swing.JTabbedPane gsmContentTabbedPane;
@@ -486,10 +518,11 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
     private javax.swing.JPanel samplePane;
     private javax.swing.JTabbedPane sampleTabbedPane;
     private javax.swing.JTable sampleTable;
-    private javax.swing.JButton viewBtn;
     private javax.swing.JButton viewGroupBtn;
     private javax.swing.JButton viewInBroswerBtn;
     private javax.swing.JPanel viewInBrowserPane;
+    private javax.swing.JButton viewPlatformBtn;
+    private javax.swing.JButton viewSampleBtn;
     // End of variables declaration//GEN-END:variables
 
     public void closeView(SOFT soft) {

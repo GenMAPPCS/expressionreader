@@ -11,6 +11,7 @@
 
 package org.genmapp.expressionreader.ui;
 
+import org.genmapp.expressionreader.tasks.SOFTViewer;
 import cytoscape.Cytoscape;
 import cytoscape.task.ui.JTaskConfig;
 import cytoscape.task.util.TaskManager;
@@ -109,6 +110,11 @@ public class GDSSubsetViewerPane extends javax.swing.JPanel implements SOFTViewe
 
         jPanel1.add(jPanel3, java.awt.BorderLayout.PAGE_START);
 
+        sampleTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                sampleTableMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(sampleTable);
 
         jPanel1.add(jScrollPane1, java.awt.BorderLayout.CENTER);
@@ -124,7 +130,7 @@ public class GDSSubsetViewerPane extends javax.swing.JPanel implements SOFTViewe
             String gsmId = (String) sampleTable.getModel().getValueAt(row, 0);
             int index = sampleTabbedPane.indexOfTab(gsmId);
             if (index < 0) { // create a new tab and add to it
-                SOFTDownloadTask task = new SOFTDownloadTask(new String[]{gsmId}, this);
+                SOFTDownloadTask task = new SOFTDownloadTask(new String[]{gsmId}, this, SOFT.Format.quick);
                 JTaskConfig config = task.getDefaultTaskConfig();
                 boolean success = TaskManager.executeTask(task, config);
             } else { // bring the tab into focus
@@ -151,10 +157,16 @@ public class GDSSubsetViewerPane extends javax.swing.JPanel implements SOFTViewe
                 public void closeView(SOFT soft) {
                     // do nothing
                 }
-            });
+            }, SOFT.Format.full);
             TaskManager.executeTask(task, task.getDefaultTaskConfig());
         }
     }//GEN-LAST:event_importBtnActionPerformed
+
+    private void sampleTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_sampleTableMouseClicked
+        if (evt.getClickCount() == 2) {
+            this.viewSampleBtnActionPerformed(null);
+        }
+    }//GEN-LAST:event_sampleTableMouseClicked
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -240,7 +252,7 @@ public class GDSSubsetViewerPane extends javax.swing.JPanel implements SOFTViewe
     }
 
     public static void main(String[] args) throws Exception {
-        final SOFT soft = ExpressionReaderUtil.getSOFT("GDS507", SOFT.Type.GDS, SOFT.Format.full);
+        final SOFT soft = ExpressionReaderUtil.getGDS("GDS507");
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 JDialog dialog = new JDialog();

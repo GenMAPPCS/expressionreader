@@ -9,7 +9,6 @@ import cytoscape.task.ui.JTaskConfig;
 import org.genmapp.expressionreader.data.SOFT;
 import org.genmapp.expressionreader.data.SOFT.Format;
 import org.genmapp.expressionreader.ExpressionReaderUtil;
-import org.genmapp.expressionreader.ui.SOFTViewer;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -24,20 +23,20 @@ public class SOFTDownloadTask extends AbstractTask {
 
     private String[] geoIDs;
     private SOFTViewer viewer;
-    private SOFT.Format format;
+    private SOFT.Format format = SOFT.Format.quick;
 
-    public Format getType() {
+    public Format getFormat() {
         return format;
     }
 
-    public void setType(Format type) {
+    public void setFormat(Format type) {
         this.format = type;
     }
 
-
-    public SOFTDownloadTask(String[] geoIDs, SOFTViewer viewer) {
+    public SOFTDownloadTask(String[] geoIDs, SOFTViewer viewer, SOFT.Format format) {
         this.geoIDs = geoIDs;
         this.viewer = viewer;
+        this.format = format;
     }
 
     public void run() {
@@ -47,18 +46,7 @@ public class SOFTDownloadTask extends AbstractTask {
                 if (taskMonitor != null) {
                     taskMonitor.setStatus("Retrieving data from GEO: " + geoID);
                 }
-                SOFT.Type type = ExpressionReaderUtil.getType(geoID);
-                SOFT soft = null;
-                if (type == SOFT.Type.GSE) {
-                    soft = ExpressionReaderUtil.getSOFT(geoID, type, Format.family);
-                } else if (type == SOFT.Type.GDS) {
-                    soft = ExpressionReaderUtil.getSOFT(geoID, type, Format.full);
-                } else {
-                    if (format == null) {
-                        format = Format.full;
-                    }
-                    soft = ExpressionReaderUtil.getSOFT(geoID, type, format);
-                }
+                SOFT soft = ExpressionReaderUtil.getSOFT(geoID, format);
                 softList.add(soft);
             }
             final List<SOFT> flist = softList;
@@ -84,9 +72,8 @@ public class SOFTDownloadTask extends AbstractTask {
         config.displayCloseButton(true);
         config.displayStatus(true);
         config.displayTimeElapsed(false);
-        config.setAutoDispose(false);
+        config.setAutoDispose(true);
         config.setModal(false);
-        //config.setOwner(Cytoscape.getDesktop());
 
         return config;
     }

@@ -11,6 +11,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.ParseException;
@@ -24,7 +25,9 @@ import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
 import javax.swing.WindowConstants;
-import org.genmapp.expressionreader.ui.SOFTViewer;
+import org.genmapp.expressionreader.data.GDS;
+import org.genmapp.expressionreader.data.GSE;
+import org.genmapp.expressionreader.tasks.SOFTViewer;
 import org.genmapp.expressionreader.ui.SOFTViewerPane;
 
 /**
@@ -36,14 +39,13 @@ public class ExpressionReaderUtil {
     public static final String GEO_URL = "http://www.ncbi.nlm.nih.gov/projects/geo/query/acc.cgi?acc=%s&targ=self&form=%s&view=%s";
     public static final String GDS_FTP = "ftp://ftp.ncbi.nih.gov/pub/geo/DATA/SOFT/GDS/%s.soft.gz";
     public static final String GSE_FTP = "ftp://ftp.ncbi.nih.gov/pub/geo/DATA/SOFT/by_series/%s_family.soft.gz";
-    public static final String GSE_FAMILY = "http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=%s&targ=all&form=text&view=full";
+    public static final String GSE_FAMILY = "http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=%s&targ=all&form=text&view=%s";
 
     public static boolean downloadSOFTGZ(String urlStr, File file) {
         final int BUFFER = 2048;
         BufferedInputStream bis = null;
         BufferedOutputStream dest = null;
         GZIPInputStream zis = null;
-        System.out.println(urlStr);
         try {
             URL url = new URL(urlStr);
             URLConnection urlc = url.openConnection();
@@ -205,43 +207,77 @@ public class ExpressionReaderUtil {
 
     }
 
-    public static synchronized SOFT getSOFT(String geoId, SOFT.Type type, SOFT.Format format) throws ParseException, IOException {
+    public static synchronized GDS getGDS(String geoId) throws ParseException, IOException {
+        File tmpFile = new File(System.getProperty("java.io.tmpdir"), geoId + ".soft");
+        boolean result = true;
+        if (!tmpFile.exists()) {
+            result = downloadSOFTGZ(String.format(GDS_FTP, geoId), tmpFile);
+        }
+        InputStream in = null;
+        GDS soft = null;
+        try {
+            if (result) {
+                in = new FileInputStream(tmpFile);
+            } else {
+                // Download failed somehow, maybe not saved to file
+                URL url = new URL(String.format(GDS_FTP, geoId));
+                in = new GZIPInputStream(url.openConnection().getInputStream());
+            }
+            soft = new SOFTParser().parseGDS(new InputStreamReader(in));
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException ex) {
+                }
+            }
+        }
+        return soft;
+    }
+
+    public static synchronized GSE getGSE(String geoId, SOFT.Format format) throws ParseException, IOException {
+        File tmpFile = new File(System.getProperty("java.io.tmpdir"), geoId + "-family-" + format + ".txt");
+        boolean result = true;
+        String urlStr = null;
+        if (!tmpFile.exists()) {
+            urlStr = String.format(GSE_FAMILY, geoId, format);
+            result = downloadURL(urlStr, tmpFile);
+        }
+        InputStream in = null;
+        GSE soft = null;
+        try {
+            if (result) {
+                in = new FileInputStream(tmpFile);
+            } else {
+                // Download failed somehow, maybe not saved to file
+                URL url = new URL(urlStr);
+                in = url.openConnection().getInputStream();
+            }
+            soft = new SOFTParser().parseGSE(new InputStreamReader(in));
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException ex) {
+                }
+            }
+        }
+        return soft;
+    }
+
+    public static synchronized SOFT getSOFT(String geoId, SOFT.Format format) throws ParseException, IOException {
+        SOFT.Type type = getType(geoId);
         String tmpDir = System.getProperty("java.io.tmpdir");
-        if (type == SOFT.Type.GDS) { // GDS ftp only
-            File tmpFile = new File(tmpDir, geoId + ".soft");
-            boolean result = true;
-            if (!tmpFile.exists()) {
-                result = downloadSOFTGZ(String.format(GDS_FTP, geoId), tmpFile);
-            }
-            InputStream in = null;
-            SOFT soft = null;
-            try {
-                if (result) {
-                    in = new FileInputStream(tmpFile);
-                } else {
-                    // Download failed somehow, maybe not saved to file
-                    URL url = new URL(String.format(GDS_FTP, geoId));
-                    in = new GZIPInputStream(url.openConnection().getInputStream());
-                }
-                soft = new SOFTParser().parseSOFT(in, type, format);
-            } finally {
-                if (in != null) {
-                    try {
-                        in.close();
-                    } catch (IOException ex) {
-                    }
-                }
-            }
-            return soft;
+        if (type == SOFT.Type.GDS) { // GDS ftp only, 
+            return getGDS(geoId);
+        } else if (type == SOFT.Type.GSE) {
+            return getGSE(geoId, format);
         } else {
             File tmpFile = new File(tmpDir, geoId + '-' + format + ".txt");
             boolean result = true;
             String urlStr = null;
             if (!tmpFile.exists()) {
-                if (format == SOFT.Format.family)
-                    urlStr = String.format(GSE_FAMILY, geoId);
-                else
-                    urlStr = String.format(GEO_URL, geoId, "text", format);
+                urlStr = String.format(GEO_URL, geoId, "text", format);
                 result = downloadURL(urlStr, tmpFile);
             }
             InputStream in = null;
@@ -250,11 +286,12 @@ public class ExpressionReaderUtil {
                 if (result) {
                     in = new FileInputStream(tmpFile);
                 } else {
-                    // Download failed somehow, maybe not saved to file
+                    // Download failed somehow, maybe it could not save file.
+                    // So try download from URL directly again
                     URL url = new URL(urlStr);
                     in = url.openConnection().getInputStream();
                 }
-                soft = new SOFTParser().parseSOFT(in, type, format);
+                soft = new SOFTParser().parse(in, type);
             } finally {
                 if (in != null) {
                     try {

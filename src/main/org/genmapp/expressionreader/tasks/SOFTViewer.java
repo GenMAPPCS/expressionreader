@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package org.genmapp.expressionreader.ui;
+package org.genmapp.expressionreader.tasks;
 
 import java.util.List;
 import org.genmapp.expressionreader.data.SOFT;

@@ -23,6 +23,7 @@ public class GEOSearchAction extends CytoscapeAction {
     @Override
     public void actionPerformed(ActionEvent ae) {
         GEOSearchDialog dialog = new GEOSearchDialog(Cytoscape.getDesktop(), false);
+        dialog.setSize(800, 500);
         dialog.setVisible(true);
     }
 

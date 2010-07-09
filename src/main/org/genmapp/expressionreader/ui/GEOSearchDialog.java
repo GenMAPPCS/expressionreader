@@ -11,44 +11,47 @@
 
 package org.genmapp.expressionreader.ui;
 
+import org.genmapp.expressionreader.tasks.SOFTViewer;
 import cytoscape.Cytoscape;
 import cytoscape.task.Task;
 import cytoscape.task.ui.JTaskConfig;
 import cytoscape.task.util.TaskManager;
-import gov.nih.nlm.ncbi.soap.eutils.EUtilsService;
-import gov.nih.nlm.ncbi.soap.eutils.EUtilsServiceSoap;
 import gov.nih.nlm.ncbi.soap.eutils.esearch.ESearchRequest;
-import gov.nih.nlm.ncbi.soap.eutils.esearch.ESearchResult;
 import gov.nih.nlm.ncbi.soap.eutils.esummary.DocSumType;
-import gov.nih.nlm.ncbi.soap.eutils.esummary.ESummaryRequest;
-import gov.nih.nlm.ncbi.soap.eutils.esummary.ESummaryResult;
 import gov.nih.nlm.ncbi.soap.eutils.esummary.ItemType;
 import java.awt.Dimension;
-import java.util.ArrayList;
 import java.util.List;
-import javax.swing.SwingUtilities;
-import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import org.genmapp.expressionreader.ExpressionReaderUtil;
 import org.genmapp.expressionreader.data.SOFT;
-import org.genmapp.expressionreader.tasks.AbstractTask;
+import org.genmapp.expressionreader.tasks.GEOSearchTask;
 import org.genmapp.expressionreader.tasks.SOFTDownloadTask;
+import org.genmapp.expressionreader.tasks.SearchResultViewer;
 
 /**
  *
  * @author djiao
  */
-public class GEOSearchDialog extends javax.swing.JDialog {
+public class GEOSearchDialog extends javax.swing.JDialog implements SearchResultViewer {
 
     private int page = 0;
     private int itemPerPage = 20;
     private int total = 0;
+    private String term = "";
 
     /** Creates new form GEOSearchDialog */
     public GEOSearchDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
-        this.setLocationRelativeTo(parent);
         initComponents();
+
+        double[] percent = new double[] {0.1, 0.2, 0.25, 0.2, 0.1, 0.2};
+        for (int i = 0; i < resultTable.getColumnCount(); i++) {
+            TableColumn column = resultTable.getColumnModel().getColumn(i);
+            column.setPreferredWidth((int) (1200 * percent[i]));
+            column.setResizable(true);
+        } 
+
     }
 
     /** This method is called from within the constructor to
@@ -74,10 +77,14 @@ public class GEOSearchDialog extends javax.swing.JDialog {
         pageField = new javax.swing.JTextField();
         totalLbl = new javax.swing.JLabel();
         nextBtn = new javax.swing.JButton();
+        jPanel3 = new javax.swing.JPanel();
+        statusLbl = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        getContentPane().setLayout(new java.awt.BorderLayout(2, 2));
 
-        searchPane.setLayout(new java.awt.BorderLayout());
+        searchPane.setBorder(javax.swing.BorderFactory.createTitledBorder("Enter Search Term"));
+        searchPane.setLayout(new java.awt.BorderLayout(2, 2));
 
         searchFld.setMinimumSize(new java.awt.Dimension(150, 27));
         searchFld.addActionListener(new java.awt.event.ActionListener() {
@@ -107,10 +114,42 @@ public class GEOSearchDialog extends javax.swing.JDialog {
 
         getContentPane().add(bottomPane, java.awt.BorderLayout.PAGE_END);
 
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Results"));
         jPanel1.setLayout(new java.awt.BorderLayout());
 
-        resultTable.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_LAST_COLUMN);
+        resultScrollPane.setPreferredSize(new java.awt.Dimension(452, 202));
+
+        resultTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "ID", "Title", "Summary", "Platform", "Species", "Samples"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        resultTable.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
+        resultTable.setRowHeight(22);
         resultTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        resultTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                resultTableMouseClicked(evt);
+            }
+        });
         resultScrollPane.setViewportView(resultTable);
 
         jPanel1.add(resultScrollPane, java.awt.BorderLayout.CENTER);
@@ -149,12 +188,28 @@ public class GEOSearchDialog extends javax.swing.JDialog {
 
         jPanel1.add(jPanel2, java.awt.BorderLayout.PAGE_START);
 
+        jPanel3.setLayout(new java.awt.BorderLayout());
+
+        statusLbl.setText("  ");
+        jPanel3.add(statusLbl, java.awt.BorderLayout.EAST);
+
+        jPanel1.add(jPanel3, java.awt.BorderLayout.PAGE_END);
+
         getContentPane().add(jPanel1, java.awt.BorderLayout.CENTER);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void searchBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchBtnActionPerformed
+        if (("").equals(searchFld.getText())) {
+            return;
+        }
+
+        if (!this.term.equals(searchFld.getText())) { //  new search
+            this.term = searchFld.getText();
+            this.page = 0;
+        }
+
         ESearchRequest request = new ESearchRequest();
         request.setDb("gds");
         request.setRetMax(String.valueOf(this.itemPerPage));
@@ -163,84 +218,7 @@ public class GEOSearchDialog extends javax.swing.JDialog {
 
         final ESearchRequest query = request;
 
-        Task task = new AbstractTask() {
-
-            public void run() {
-                EUtilsService service = new EUtilsService();
-                EUtilsServiceSoap clientStub = service.getEUtilsServiceSoap();
-                final ESearchResult result = clientStub.runESearch(query);
-                total = Integer.parseInt(result.getCount());
-                String ids = ExpressionReaderUtil.join(result.getIdList().getId(), ",");
-
-                ESummaryRequest req = new ESummaryRequest();
-                req.setDb("gds");
-                req.setId(ids);
-
-                ESummaryResult res = clientStub.runESummary(req);
-                final List<DocSumType> docsum = res.getDocSum();
-
-                SwingUtilities.invokeLater(new Runnable() {
-
-                    public void run() {
-                        pageField.setText(String.valueOf(page+1));
-                        int totalPages = total % itemPerPage == 0 ? total / itemPerPage : (total/itemPerPage+1);
-                        totalLbl.setText("Of " + totalPages);
-
-                        prevBtn.setEnabled(page != 0);
-                        nextBtn.setEnabled((page + 1) != totalPages);
-
-                        resultTable.setModel(new AbstractTableModel() {
-                            
-                            @Override
-                            public String getColumnName(int i) {
-                                if (i == 0) {
-                                    return "ID";
-                                } else {
-                                    return "Title";
-                                }
-                            }
-
-                            public int getRowCount() {
-                                return docsum.size();
-                            }
-
-                            public int getColumnCount() {
-                                return 2;
-                            }
-
-                            public Object getValueAt(int i, int i1) {
-                                DocSumType ds = docsum.get(i);
-                                if (i1 == 0) {
-                                    ItemType item = ds.getItem().get(8);
-                                    String entryType = item.getItemContent();
-                                    if ("GDS".equals(entryType)) {
-                                        item = ds.getItem().get(0);
-                                    } else if ("GSE".equals(entryType)) {
-                                        item = ds.getItem().get(4);
-                                    } else if ("GPL".equals(entryType)) {
-                                        item = ds.getItem().get(3);
-                                    }
-                                    return entryType + item.getItemContent();
-                                } else {
-                                    ItemType item = ds.getItem().get(i1);
-                                    return item.getItemContent();
-                                }
-                            }
-                        });
-                        Dimension tableDim = resultTable.getPreferredSize();
-                        TableColumn column = resultTable.getColumnModel().getColumn(0);
-                        column.setPreferredWidth((int) (tableDim.width * 0.2));
-                        column = resultTable.getColumnModel().getColumn(1);
-                        column.setPreferredWidth((int) (tableDim.width * 0.8));
-                    }
-                });
-            }
-
-            public String getTitle() {
-                return "Search GEO";
-            }
-
-        };
+        Task task = new GEOSearchTask(query, this);
         JTaskConfig config = new JTaskConfig();
         config.setModal(false);
         config.setOwner(Cytoscape.getDesktop());
@@ -292,7 +270,7 @@ public class GEOSearchDialog extends javax.swing.JDialog {
                     public void closeView(SOFT soft) {
                         // not implemented
                     }
-                });
+                }, SOFT.Format.quick);
             JTaskConfig config = task.getDefaultTaskConfig();
 
             TaskManager.executeTask(task, config);
@@ -303,6 +281,12 @@ public class GEOSearchDialog extends javax.swing.JDialog {
     private void searchFldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchFldActionPerformed
         this.searchBtnActionPerformed(evt);
     }//GEN-LAST:event_searchFldActionPerformed
+
+    private void resultTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_resultTableMouseClicked
+        if (evt.getClickCount() == 2) {
+            viewBtnActionPerformed(null);
+        }
+}//GEN-LAST:event_resultTableMouseClicked
 
     /**
     * @param args the command line arguments
@@ -327,6 +311,7 @@ public class GEOSearchDialog extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
     private javax.swing.JButton nextBtn;
     private javax.swing.JTextField pageField;
     private javax.swing.JButton prevBtn;
@@ -335,8 +320,52 @@ public class GEOSearchDialog extends javax.swing.JDialog {
     private javax.swing.JButton searchBtn;
     private javax.swing.JTextField searchFld;
     private javax.swing.JPanel searchPane;
+    private javax.swing.JLabel statusLbl;
     private javax.swing.JLabel totalLbl;
     private javax.swing.JButton viewBtn;
     // End of variables declaration//GEN-END:variables
+
+    public void viewResults(int total, final List<DocSumType> list) {
+        pageField.setText(String.valueOf(page + 1));
+        int totalPages = total % itemPerPage == 0 ? total / itemPerPage : (total / itemPerPage + 1);
+        totalLbl.setText("Of " + totalPages);
+
+        String status = String.format("Viewing results %d to %d of %d", page*itemPerPage+1, 
+                ((page+1)*itemPerPage>total)? total : (page+1)*itemPerPage, total);
+        statusLbl.setText(status);
+
+        prevBtn.setEnabled(page != 0);
+        nextBtn.setEnabled((page + 1) != totalPages);
+
+        DefaultTableModel model = (DefaultTableModel)resultTable.getModel();
+        model.getDataVector().removeAllElements();
+
+        String[] row = null;
+        for (DocSumType docsum : list) {
+            row = new String[6];
+            List<ItemType> items = docsum.getItem();
+
+            ItemType item = items.get(8);
+            String entryType = item.getItemContent();
+            if ("GDS".equals(entryType)) {
+                item = items.get(0);
+            } else if ("GSE".equals(entryType)) {
+                item = items.get(4);
+            } else if ("GPL".equals(entryType)) {
+                item = items.get(3);
+            }
+            row[0] = entryType + item.getItemContent();
+
+            row[1] = items.get(1).getItemContent();     // title
+            row[2] = items.get(2).getItemContent();     // summary
+            row[3] = items.get(20).getItemContent();    // platform
+            row[4] = items.get(5).getItemContent();     // species
+            row[5] = items.get(6).getItemContent();     // GSM
+
+            model.addRow(row);
+        }
+
+
+    }
 
 }

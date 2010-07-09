@@ -126,48 +126,25 @@ public class SOFTParser {
             return null;
         }
     }
-
-    public SOFT parseSOFT(InputStream in, SOFT.Type type) throws ParseException, IOException {
-        return parseSOFT(in, type, SOFT.Format.full);
-    }
-
-    public SOFT parseSOFT(Reader in, SOFT.Type type) throws ParseException {
-        return parseSOFT(in, type, SOFT.Format.full);
-    }
-
-    public SOFT parseSOFT(InputStream in, SOFT.Type type, SOFT.Format format) throws ParseException, IOException {
+    
+    public SOFT parse(InputStream in, SOFT.Type type) throws ParseException, IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-        return parseSOFT(reader, type, format);
-
+        return parse(reader, type);
     }
 
-    public SOFT parseSOFT(Reader in, SOFT.Type type, SOFT.Format format) throws ParseException {
+    public SOFT parse(Reader in, SOFT.Type type) throws ParseException {
         SOFT soft = null;
         if (SOFT.Type.GDS == type) {
             soft = parseGDS(in);
+        } else if (SOFT.Type.GSE == type) {
+            soft = parseGSE(in);
         } else {
-            switch (format) {
-                case quick:
-                    soft = parseQuickSOFT(in, type);
-                    break;
-                case full:
-                    soft = parseQuickSOFT(in, type);
-                    break;
-                case family:
-                    soft = parseGSEFamilySOFT(in);
-                    break;
-                default:
-                    throw new UnsupportedOperationException("Can't parse format: " + format.name());
-            }
-        }
-        if (soft != null) {
-            soft.setFormat(format);
-            soft.setType(type);
+            soft = parseSOFT(in, type);
         }
         return soft;
     }
 
-    private GDS parseGDS(Reader in) throws ParseException {
+    public GDS parseGDS(Reader in) throws ParseException {
         GDS gds = null;
         BufferedReader reader = null;
         try {
@@ -209,8 +186,7 @@ public class SOFTParser {
         return gds;
     }
 
-    private GSE parseGSEFamilySOFT(Reader in) throws ParseException {
-        SOFT.Type type = SOFT.Type.GSE;
+    public GSE parseGSE(Reader in) throws ParseException {
         GSE gse = null;
         BufferedReader reader = null;
         try {
@@ -262,7 +238,7 @@ public class SOFTParser {
         return gse;
     }
 
-    private SOFT parseQuickSOFT(Reader in, Type type) throws ParseException {
+    private SOFT parseSOFT(Reader in, Type type) throws ParseException {
         SOFT soft = null;
         BufferedReader reader = in instanceof BufferedReader ? (BufferedReader) in : new BufferedReader(in);
         try {

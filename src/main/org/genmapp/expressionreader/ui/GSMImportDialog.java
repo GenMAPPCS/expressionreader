@@ -1,5 +1,6 @@
 package org.genmapp.expressionreader.ui;
 
+import org.genmapp.expressionreader.tasks.SOFTViewer;
 import cytoscape.CyNetwork;
 import cytoscape.CyNode;
 import cytoscape.Cytoscape;
@@ -476,7 +477,7 @@ public class GSMImportDialog extends javax.swing.JDialog implements SOFTViewer {
                 gpls.add((String) soft.getFields().get("Sample_platform_id"));
             }
 
-            SOFTDownloadTask task = new SOFTDownloadTask(gpls.toArray(new String[gpls.size()]), this);
+            SOFTDownloadTask task = new SOFTDownloadTask(gpls.toArray(new String[gpls.size()]), this, SOFT.Format.full);
             JTaskConfig config = task.getDefaultTaskConfig();
             TaskManager.executeTask(task, config);
         } else if ("View GPL Data".equals(evt.getActionCommand())) {
@@ -491,16 +492,8 @@ public class GSMImportDialog extends javax.swing.JDialog implements SOFTViewer {
         java.awt.EventQueue.invokeLater(new Runnable() {
 
             public void run() {
-                URL url;
-                InputStream gplIn = null;
                 try {
-                    url = new URL(String.format(ExpressionReaderUtil.GEO_URL, "GSM207569", "text", "full"));
-                    gplIn = url.openConnection().getInputStream();
-
-                    SOFT gsm = new SOFTParser().parseSOFT(gplIn, SOFT.Type.GSM);
-                    if (gplIn != null) {
-                        gplIn.close();
-                    }
+                    SOFT gsm = ExpressionReaderUtil.getSOFT("GSM207569", SOFT.Format.full);
                     GSMImportDialog dialog = new GSMImportDialog(new javax.swing.JFrame(), true);
                     List<SOFT> softList = new ArrayList<SOFT>();
                     softList.add(gsm);
@@ -514,12 +507,7 @@ public class GSMImportDialog extends javax.swing.JDialog implements SOFTViewer {
                     });
                     dialog.setVisible(true);
                 } catch (Exception ex) {
-                } finally {
-                    try {
-                        gplIn.close();
-                    } catch (IOException ex) {
-                    }
-                }
+                } 
             }
         });
 

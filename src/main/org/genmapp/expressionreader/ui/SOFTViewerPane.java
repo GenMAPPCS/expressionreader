@@ -6,6 +6,7 @@
 
 package org.genmapp.expressionreader.ui;
 
+import org.genmapp.expressionreader.tasks.SOFTViewer;
 import org.genmapp.expressionreader.data.SOFT;
 import org.genmapp.expressionreader.ExpressionReaderUtil;
 import java.util.ArrayList;

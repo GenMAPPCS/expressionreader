@@ -52,25 +52,25 @@ public class ExpressionReaderUtilTest {
     }
 
     @Test
-    public void testGetSOFT() throws Exception {
-        GDS soft = (GDS)ExpressionReaderUtil.getSOFT("GDS507", Type.GDS, null);
+    public void testGetGDS() throws Exception {
+        GDS soft = (GDS)ExpressionReaderUtil.getGDS("GDS507");
         assertNotNull(soft);
         assertEquals(12, soft.getSubsets().size());
 
-        SOFT gsm = (SOFT)ExpressionReaderUtil.getSOFT("GSM11805", Type.GSM, SOFT.Format.quick);
+        SOFT gsm = (SOFT)ExpressionReaderUtil.getGDS("GSM11805");
         assertEquals(22283, gsm.getDataTables().getFirst().getData().size());
     }
 
     @Test
-    public void testGetSOFTFamily() throws Exception {
-        GSE soft = (GSE) ExpressionReaderUtil.getSOFT("GSE8854", Type.GSE, SOFT.Format.family);
+    public void testGetGSE() throws Exception {
+        GSE soft = (GSE) ExpressionReaderUtil.getGSE("GSE8854", SOFT.Format.full);
         assertNotNull(soft);
         assertEquals(9, soft.getPlatforms().size());
     }
 
     @Test
-    public void testGetSOFTFamily2() throws Exception {
-        GSE soft = (GSE) ExpressionReaderUtil.getSOFT("GSE9914", Type.GSE, SOFT.Format.family);
+    public void testGetGSE2() throws Exception {
+        GSE soft = (GSE) ExpressionReaderUtil.getGSE("GSE9914", SOFT.Format.quick);
         assertNotNull(soft);
         assertEquals(6, soft.getDataTables().size());
     }
