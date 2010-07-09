@@ -44,6 +44,7 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
     public void setSOFT(SOFT soft) {
         this.soft = soft;
         final GSE gse = (GSE) soft;
+        this.setTitle(soft.getId());
         sampleTable.setModel(new AbstractTableModel() {
 
             List<SOFT> samples = gse.getSamples();

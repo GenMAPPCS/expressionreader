@@ -89,6 +89,8 @@ public class GDSViewerDialog extends javax.swing.JDialog implements SOFTViewer {
             this.softViewerPane.setOwner(this);
             this.softViewerPane.setSoft(soft);
 
+            this.setTitle(soft.getId());
+
             List<SOFT> subsets = gds.getSubsets();
             for (SOFT subset : subsets) {
                 GDSSubsetViewerPane pane = new GDSSubsetViewerPane();

@@ -81,6 +81,7 @@ public class GEOSearchDialog extends javax.swing.JDialog implements SearchResult
         statusLbl = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Search GEO");
         getContentPane().setLayout(new java.awt.BorderLayout(2, 2));
 
         searchPane.setBorder(javax.swing.BorderFactory.createTitledBorder("Enter Search Term"));
@@ -254,6 +255,7 @@ public class GEOSearchDialog extends javax.swing.JDialog implements SearchResult
                             if (soft.getType() == SOFT.Type.GSE) {
                                 GSEViewerDialog dialog = new GSEViewerDialog(Cytoscape.getDesktop(), false);
                                 dialog.setSOFT(soft);
+                                dialog.setSize(600, 500);
                                 dialog.setVisible(true);
                             } else if (soft.getType() == SOFT.Type.GDS) {
                                 GDSViewerDialog dialog = new GDSViewerDialog(Cytoscape.getDesktop(), false);

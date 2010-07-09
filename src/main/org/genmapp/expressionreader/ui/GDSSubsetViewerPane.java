@@ -60,6 +60,7 @@ public class GDSSubsetViewerPane extends javax.swing.JPanel implements SOFTViewe
         jScrollPane1 = new javax.swing.JScrollPane();
         sampleTable = new javax.swing.JTable();
 
+        setMinimumSize(new java.awt.Dimension(192, 250));
         setLayout(new java.awt.BorderLayout());
 
         jSplitPane1.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
