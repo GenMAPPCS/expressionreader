@@ -9,10 +9,11 @@ import cytoscape.task.ui.JTaskConfig;
 import org.genmapp.expressionreader.data.SOFT;
 import org.genmapp.expressionreader.data.SOFT.Format;
 import org.genmapp.expressionreader.ExpressionReaderUtil;
-import org.genmapp.expressionreader.data.SOFT.Type;
 import org.genmapp.expressionreader.ui.SOFTViewer;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.SwingUtilities;
 
 /**
@@ -21,7 +22,7 @@ import javax.swing.SwingUtilities;
  */
 public class SOFTDownloadTask extends AbstractTask {
 
-    private String geoID;
+    private String[] geoIDs;
     private SOFTViewer viewer;
     private SOFT.Format format;
 
@@ -34,33 +35,37 @@ public class SOFTDownloadTask extends AbstractTask {
     }
 
 
-    public SOFTDownloadTask(String geoID, SOFTViewer viewer) {
-        this.geoID = geoID;
+    public SOFTDownloadTask(String[] geoIDs, SOFTViewer viewer) {
+        this.geoIDs = geoIDs;
         this.viewer = viewer;
     }
 
     public void run() {
-        if (taskMonitor != null) {
-            taskMonitor.setStatus("Retrieving data from GEO: " + geoID);
-        }
         try {
-            SOFT.Type type = ExpressionReaderUtil.getType(geoID);
-            SOFT soft = null;
-            if (type == SOFT.Type.GSE) {
-                soft = ExpressionReaderUtil.getSOFT(geoID, type, Format.family);
-            } else if (type == SOFT.Type.GDS) {
-                soft = ExpressionReaderUtil.getSOFT(geoID, type, Format.full);
-            } else {
-                if (format == null) {
-                    format = Format.full;
+            List<SOFT> softList = new ArrayList<SOFT>();
+            for (String geoID : geoIDs ) {
+                if (taskMonitor != null) {
+                    taskMonitor.setStatus("Retrieving data from GEO: " + geoID);
                 }
-                soft = ExpressionReaderUtil.getSOFT(geoID, type, format);
+                SOFT.Type type = ExpressionReaderUtil.getType(geoID);
+                SOFT soft = null;
+                if (type == SOFT.Type.GSE) {
+                    soft = ExpressionReaderUtil.getSOFT(geoID, type, Format.family);
+                } else if (type == SOFT.Type.GDS) {
+                    soft = ExpressionReaderUtil.getSOFT(geoID, type, Format.full);
+                } else {
+                    if (format == null) {
+                        format = Format.full;
+                    }
+                    soft = ExpressionReaderUtil.getSOFT(geoID, type, format);
+                }
+                softList.add(soft);
             }
-            final SOFT fsoft = soft;
+            final List<SOFT> flist = softList;
             // Configures a mapping after the download
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                    viewer.viewSOFT(fsoft);
+                    viewer.viewSOFT(flist);
                 }
             });
         } catch (IOException ex) {
@@ -69,7 +74,7 @@ public class SOFTDownloadTask extends AbstractTask {
     }
 
     public String getTitle() {
-        return "Download " + geoID;
+        return "Download SOFT files";
     }
 
     public JTaskConfig getDefaultTaskConfig() {
@@ -79,7 +84,7 @@ public class SOFTDownloadTask extends AbstractTask {
         config.displayCloseButton(true);
         config.displayStatus(true);
         config.displayTimeElapsed(false);
-        config.setAutoDispose(true);
+        config.setAutoDispose(false);
         config.setModal(false);
         //config.setOwner(Cytoscape.getDesktop());
 

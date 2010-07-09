@@ -99,7 +99,7 @@ public class GDSViewerDialog extends javax.swing.JDialog implements SOFTViewer {
         }
     }
 
-    public void viewSOFT(SOFT soft) {
+    public void viewSOFT(List<SOFT> soft) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

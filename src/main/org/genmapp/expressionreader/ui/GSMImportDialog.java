@@ -23,11 +23,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 
 /**
@@ -36,15 +36,24 @@ import javax.swing.JOptionPane;
  */
 public class GSMImportDialog extends javax.swing.JDialog implements SOFTViewer {
 
-    private SOFT soft;
-    private SOFT gpl;
+    private List<SOFT> softList;
+    private List<SOFT> gplList = new ArrayList<SOFT>();
     private CyThesaurusServiceClient client = new CyThesaurusServiceMessageBasedClient();
 
     /** Creates new form SOFTImportDialog */
-    public GSMImportDialog(java.awt.Frame parent, boolean modal, SOFT soft) {
+    public GSMImportDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
-        this.soft = soft;
         initComponents();
+    }
+
+    public void setSOFTList(List<SOFT> softList) {
+        this.softList = softList;
+        if (softList.size() == 1) {
+            SOFT soft = softList.get(0);
+            sampleNameLbl.setText("Sample: " + soft.getId());
+        } else {
+            sampleNameLbl.setText("Multiple Samples");
+        }
         populateAttributes();
     }
 
@@ -94,7 +103,7 @@ public class GSMImportDialog extends javax.swing.JDialog implements SOFTViewer {
         setTitle("Import Gene Expression Data");
         getContentPane().setLayout(new java.awt.GridBagLayout());
 
-        sampleNameLbl.setText("Sample: " + soft.getId());
+        sampleNameLbl.setText("sampleId");
         sampleNamePane.add(sampleNameLbl);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -330,97 +339,102 @@ public class GSMImportDialog extends javax.swing.JDialog implements SOFTViewer {
 
                 final int tgtKeyIndex = targetKeyAttrCombo.getSelectedIndex();
 
-                DataTable dt = soft.getDataTables().getFirst();
+                for (SOFT soft : softList) {
+                    DataTable dt = soft.getDataTables().getFirst();
 
-                List<String> dataKeys = new ArrayList<String>(dt.getData().keySet());
-                List<Object> merged = new ArrayList<Object>();
-                for (String key : dataKeys) {
-                    List<String> list = new ArrayList<String>();
-                    list.addAll(dt.getData().get(key));
-                    if (gpl != null) {
-                        list.addAll(gpl.getDataTables().getFirst().getData().get(key));
-                    }
-                    merged.add(list);
-                }
-
-                List<String> mapFrom = new ArrayList<String>();
-                for (CyNode node : nodes) {
-                    if ("ID".equals(srcKeyAttr)) {
-                        mapFrom.add(node.getIdentifier());
-                    } else {
-                        mapFrom.add((String) cyattrs.getAttribute(node.getIdentifier(), srcKeyAttr));
-                    }
-                }
-
-                Collections.sort(merged, new Comparator<Object>() {
-                    public int compare(Object t, Object t1) {
-                        String s = (String) ((List) t).get(tgtKeyIndex);
-                        String s1 = (String) ((List) t1).get(tgtKeyIndex);
-                        return s.compareTo(s1);
-                    }
-                });
-
-                Comparator comparator = new Comparator() {
-                    public int compare(Object t, Object t1) {
-                        String s = (String) ((List) t).get(tgtKeyIndex);
-                        String s1 = (String) t1;
-                        return s.compareTo(s1);
-                    }
-                };
-                Map mapTypeAttr = null;
-                if (idMapConfigBtn.isEnabled()) { // use id mappings
-
-                    if (taskMonitor != null) {
-                        taskMonitor.setStatus("Mapping IDs");
-                    }
-                    String srcIDType = (String) sourceIdTypeCombo.getSelectedItem();
-                    String tgtIDType = (String) targetIdTypeCombo.getSelectedItem();
-
-                    Set<String> srcIDs = new HashSet<String>();
-                    srcIDs.addAll(mapFrom);
-                    mapTypeAttr = client.mapID(srcIDs, srcIDType, tgtIDType);
-                }
-
-                if (taskMonitor != null) {
-                    taskMonitor.setStatus("Importing Data into Network");
-                }
-                int totalAdded = 0;
-                String nameAttr = getAttrName(cyattrs, nodes.get(0), tgtValueAttr);
-                // find all occurances and add to nodes
-                for (int i = 0; i < nodes.size(); i++) {
-                    String srcKeyVal = mapFrom.get(i);
-                    CyNode node = nodes.get(i);
-
-                    if (idMapConfigBtn.isEnabled()) {
-                        Set<String> values = (Set<String>) mapTypeAttr.get(srcKeyVal);
-
-                        if (values != null && !values.isEmpty()) {
-                            Iterator<String> it = values.iterator();
-                            while (it.hasNext()) {
-                                String next = it.next();
-                                int index = Collections.binarySearch(merged, next, comparator);
-                                if (index >= 0) {
-                                    List list = (List) merged.get(index);
-                                    cyattrs.setAttribute(node.getIdentifier(), nameAttr,
-                                            (String) list.get(tgtValueIndex));
-                                    totalAdded++;
-                                    break;
-                                }
+                    List<String> dataKeys = new ArrayList<String>(dt.getData().keySet());
+                    List<Object> merged = new ArrayList<Object>();
+                    for (String key : dataKeys) {
+                        List<String> list = new ArrayList<String>();
+                        list.addAll(dt.getData().get(key));
+                        if (gplList != null) {
+                            for (SOFT gpl : gplList) {
+                                list.addAll(gpl.getDataTables().getFirst().getData().get(key));
                             }
                         }
-                    } else {
-                        int index = Collections.binarySearch(merged, srcKeyVal, comparator);
-                        if (index >= 0) {
-                            List list = (List) merged.get(index);
-                            cyattrs.setAttribute(node.getIdentifier(), nameAttr,
-                                    (String) list.get(tgtValueIndex));
-                            totalAdded++;
+                        merged.add(list);
+                    }
+
+                    List<String> mapFrom = new ArrayList<String>();
+                    for (CyNode node : nodes) {
+                        if ("ID".equals(srcKeyAttr)) {
+                            mapFrom.add(node.getIdentifier());
+                        } else {
+                            mapFrom.add((String) cyattrs.getAttribute(node.getIdentifier(), srcKeyAttr));
+                        }
+                    }
+
+                    Collections.sort(merged, new Comparator<Object>() {
+
+                        public int compare(Object t, Object t1) {
+                            String s = (String) ((List) t).get(tgtKeyIndex);
+                            String s1 = (String) ((List) t1).get(tgtKeyIndex);
+                            return s.compareTo(s1);
+                        }
+                    });
+
+                    Comparator comparator = new Comparator() {
+
+                        public int compare(Object t, Object t1) {
+                            String s = (String) ((List) t).get(tgtKeyIndex);
+                            String s1 = (String) t1;
+                            return s.compareTo(s1);
+                        }
+                    };
+                    Map mapTypeAttr = null;
+                    if (idMapConfigBtn.isEnabled()) { // use id mappings
+
+                        if (taskMonitor != null) {
+                            taskMonitor.setStatus("Mapping IDs");
+                        }
+                        String srcIDType = (String) sourceIdTypeCombo.getSelectedItem();
+                        String tgtIDType = (String) targetIdTypeCombo.getSelectedItem();
+
+                        Set<String> srcIDs = new HashSet<String>();
+                        srcIDs.addAll(mapFrom);
+                        mapTypeAttr = client.mapID(srcIDs, srcIDType, tgtIDType);
+                    }
+
+                    if (taskMonitor != null) {
+                        taskMonitor.setStatus("Importing Data into Network");
+                    }
+                    int totalAdded = 0;
+                    String nameAttr = getAttrName(cyattrs, nodes.get(0), tgtValueAttr, soft);
+                    // find all occurances and add to nodes
+                    for (int i = 0; i < nodes.size(); i++) {
+                        String srcKeyVal = mapFrom.get(i);
+                        CyNode node = nodes.get(i);
+
+                        if (idMapConfigBtn.isEnabled()) {
+                            Set<String> values = (Set<String>) mapTypeAttr.get(srcKeyVal);
+
+                            if (values != null && !values.isEmpty()) {
+                                Iterator<String> it = values.iterator();
+                                while (it.hasNext()) {
+                                    String next = it.next();
+                                    int index = Collections.binarySearch(merged, next, comparator);
+                                    if (index >= 0) {
+                                        List list = (List) merged.get(index);
+                                        cyattrs.setAttribute(node.getIdentifier(), nameAttr,
+                                                (String) list.get(tgtValueIndex));
+                                        totalAdded++;
+                                        break;
+                                    }
+                                }
+                            }
+                        } else {
+                            int index = Collections.binarySearch(merged, srcKeyVal, comparator);
+                            if (index >= 0) {
+                                List list = (List) merged.get(index);
+                                cyattrs.setAttribute(node.getIdentifier(), nameAttr,
+                                        (String) list.get(tgtValueIndex));
+                                totalAdded++;
+                            }
                         }
                     }
                 }
                 if (taskMonitor != null) {
-                    taskMonitor.setStatus(String.format("Importing complete. Added value to %d/%d nodes. Attribute name is %s. ",
-                            totalAdded, nodes.size(), nameAttr));
+                    taskMonitor.setStatus(String.format("Importing complete"));
                 }
             }
 
@@ -436,12 +450,14 @@ public class GSMImportDialog extends javax.swing.JDialog implements SOFTViewer {
     }//GEN-LAST:event_importButtonActionPerformed
 
     private void viewInBrowserBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewInBrowserBtnActionPerformed
-        String url = String.format(ExpressionReaderUtil.GEO_URL, soft.getId(), "html", "quick");
-        ExpressionReaderUtil.openURL(url);
+        for (SOFT soft : softList) {
+            String url = String.format(ExpressionReaderUtil.GEO_URL, soft.getId(), "html", "quick");
+            ExpressionReaderUtil.openURL(url);
+        }
     }//GEN-LAST:event_viewInBrowserBtnActionPerformed
 
     private void viewSampleDataBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewSampleDataBtnActionPerformed
-        ExpressionReaderUtil.showSOFTViewerDialog(this, false, soft);
+        ExpressionReaderUtil.showSOFTViewerDialog(this, false, softList);
     }//GEN-LAST:event_viewSampleDataBtnActionPerformed
     private void idMapConfigBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_idMapConfigBtnActionPerformed
         boolean result = client.openMappingResourceConfigDialog();
@@ -455,12 +471,16 @@ public class GSMImportDialog extends javax.swing.JDialog implements SOFTViewer {
     }//GEN-LAST:event_cancelBtnActionPerformed
     private void importGPLBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importGPLBtnActionPerformed
         if ("Import GPL Data".equals(evt.getActionCommand())) {
-            String gplId = (String) soft.getFields().get("Sample_platform_id");
-            SOFTDownloadTask task = new SOFTDownloadTask(gplId, this);
+            Set<String> gpls = new HashSet<String>();
+            for (SOFT soft : softList) {
+                gpls.add((String) soft.getFields().get("Sample_platform_id"));
+            }
+
+            SOFTDownloadTask task = new SOFTDownloadTask(gpls.toArray(new String[gpls.size()]), this);
             JTaskConfig config = task.getDefaultTaskConfig();
             TaskManager.executeTask(task, config);
         } else if ("View GPL Data".equals(evt.getActionCommand())) {
-            ExpressionReaderUtil.showSOFTViewerDialog(this, false, soft);
+            ExpressionReaderUtil.showSOFTViewerDialog(this, false, gplList);
         }
     }//GEN-LAST:event_importGPLBtnActionPerformed
 
@@ -481,7 +501,10 @@ public class GSMImportDialog extends javax.swing.JDialog implements SOFTViewer {
                     if (gplIn != null) {
                         gplIn.close();
                     }
-                    GSMImportDialog dialog = new GSMImportDialog(new javax.swing.JFrame(), true, gsm);
+                    GSMImportDialog dialog = new GSMImportDialog(new javax.swing.JFrame(), true);
+                    List<SOFT> softList = new ArrayList<SOFT>();
+                    softList.add(gsm);
+                    dialog.setSOFTList(softList);
                     dialog.addWindowListener(new java.awt.event.WindowAdapter() {
 
                         @Override
@@ -550,16 +573,19 @@ public class GSMImportDialog extends javax.swing.JDialog implements SOFTViewer {
         attributes.addAll(list);
         this.sourceKeyAttrCombo.setModel(new DefaultComboBoxModel(attributes.toArray()));
 
-        List<String> headers = new ArrayList<String>(soft.getDataTables().getFirst().getHeaders().keySet());
-
+        LinkedHashSet headers = new LinkedHashSet();
+        for (SOFT soft : softList) {
+            headers.addAll(soft.getDataTables().getFirst().getHeaders().keySet());
+        }
         this.targetKeyAttrCombo.setModel(new DefaultComboBoxModel(headers.toArray()));
         this.targetValueAttrCombo.setModel(new DefaultComboBoxModel(headers.toArray()));
         // guess
+        
         if (headers.contains("VALUE")) {
-            this.targetValueAttrCombo.setSelectedIndex(headers.indexOf("VALUE"));
+            this.targetValueAttrCombo.setSelectedItem("VALUE");
         }
         if (headers.contains("ID_REF")) {
-            this.targetKeyAttrCombo.setSelectedIndex(headers.indexOf("ID_REF"));
+            this.targetKeyAttrCombo.setSelectedItem("ID_REF");
         }
 
         this.pack();
@@ -593,7 +619,7 @@ public class GSMImportDialog extends javax.swing.JDialog implements SOFTViewer {
         }, config);
     }
 
-    private String getAttrName(CyAttributes attrs, CyNode node, String tgtValueAttr) {
+    private String getAttrName(CyAttributes attrs, CyNode node, String tgtValueAttr, SOFT soft) {
         String name = String.format("%s[%s]", soft.getId(), tgtValueAttr);
         if (attrs.hasAttribute(node.getIdentifier(), name)) {
             int i = 1;
@@ -605,14 +631,18 @@ public class GSMImportDialog extends javax.swing.JDialog implements SOFTViewer {
         return name;
     }
 
-    public void viewSOFT(SOFT gpl) {
-        this.gpl = gpl;
-        if (gpl != null) {
+    public void viewSOFT(List<SOFT> list) {
+        this.gplList = list;
+        if (this.gplList.size() > 0) {
             importGPLBtn.setText("View GPL Data");
             importGPLBtn.setToolTipText("Opens a dialog to view GPL data");
             DefaultComboBoxModel model = (DefaultComboBoxModel) this.targetKeyAttrCombo.getModel();
-            for (String key : gpl.getDataTables().getFirst().getHeaders().keySet()) {
-                model.addElement(key);
+            for (SOFT gpl : list) {
+                for (String key : gpl.getDataTables().getFirst().getHeaders().keySet()) {
+                    if (model.getIndexOf(key) < 0) {
+                        model.addElement(key);
+                    }
+                }
             }
             this.pack();
         } else {

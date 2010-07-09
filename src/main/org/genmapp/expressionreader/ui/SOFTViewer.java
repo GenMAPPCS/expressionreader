@@ -13,6 +13,6 @@ import org.genmapp.expressionreader.data.SOFT;
  * @author djiao
  */
 public interface SOFTViewer {
-    public void viewSOFT(SOFT soft);
+    public void viewSOFT(List<SOFT> soft);
     public void closeView(SOFT soft);
 }

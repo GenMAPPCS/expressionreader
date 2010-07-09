@@ -38,9 +38,7 @@
       <SubComponents>
         <Component class="javax.swing.JLabel" name="sampleNameLbl">
           <Properties>
-            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="&quot;Sample: &quot; + soft.getId()" type="code"/>
-            </Property>
+            <Property name="text" type="java.lang.String" value="sampleId"/>
           </Properties>
         </Component>
       </SubComponents>

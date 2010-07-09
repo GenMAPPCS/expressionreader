@@ -16,7 +16,6 @@ import cytoscape.task.ui.JTaskConfig;
 import cytoscape.task.util.TaskManager;
 import org.genmapp.expressionreader.data.SOFT;
 import org.genmapp.expressionreader.ExpressionReaderUtil;
-import org.genmapp.expressionreader.parser.SOFTParser;
 import org.genmapp.expressionreader.tasks.SOFTDownloadTask;
 import java.io.IOException;
 import java.io.InputStream;
@@ -346,18 +345,13 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
 
     private void viewBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewBtnActionPerformed
         int[] rows = sampleTable.getSelectedRows();
-        for (int row : rows) {
-            String gsmId = (String)sampleTable.getModel().getValueAt(row, 0);
-            int index = sampleTabbedPane.indexOfTab(gsmId);
-            if (index < 0) { // create a new tab and add to it
-                SOFTDownloadTask task = new SOFTDownloadTask(gsmId, this);
-                JTaskConfig config = task.getDefaultTaskConfig();
-                boolean success = TaskManager.executeTask(task, config);
-            } else { // bring the tab into focus
-                sampleTabbedPane.setSelectedIndex(index);
-            }
+        String[] ids = new String[rows.length];
+        for (int i = 0; i < rows.length; i++) {
+            ids[i] = (String)sampleTable.getModel().getValueAt(rows[i], 0);
         }
-
+        SOFTDownloadTask task = new SOFTDownloadTask(ids, this);
+        JTaskConfig config = task.getDefaultTaskConfig();
+        boolean success = TaskManager.executeTask(task, config);
     }//GEN-LAST:event_viewBtnActionPerformed
 
     private void viewInBroswerBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewInBroswerBtnActionPerformed
@@ -367,36 +361,36 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
 
     private void importSampleBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importSampleBtnActionPerformed
         int[] rows = sampleTable.getSelectedRows();
-            String gsmId = (String)sampleTable.getModel().getValueAt(rows[0], 0);
-            if (gsmId != null && !"".equals(gsmId)) {
-                SOFTDownloadTask task = new SOFTDownloadTask(gsmId, new SOFTViewer() {
+        String[] ids = new String[rows.length];
+        for (int i = 0; i < rows.length; i++) {
+            ids[i] = (String)sampleTable.getModel().getValueAt(rows[i], 0);
+        }
+        if (ids.length > 0) {
+            SOFTDownloadTask task = new SOFTDownloadTask(ids, new SOFTViewer() {
 
-                    public void viewSOFT(SOFT soft) {
-                        GSMImportDialog dialog = new GSMImportDialog(Cytoscape.getDesktop(), true, soft);
-                        dialog.setVisible(true);
-                    }
+                public void viewSOFT(List<SOFT> list) {
+                    GSMImportDialog dialog = new GSMImportDialog(Cytoscape.getDesktop(), false);
+                    dialog.setSOFTList(list);
+                    dialog.setVisible(true);
+                }
 
-                    public void closeView(SOFT soft) {
-                        // do nothing
-                    }
-                });
-                TaskManager.executeTask(task, task.getDefaultTaskConfig());
-            }
+                public void closeView(SOFT soft) {
+                    // do nothing
+                }
+            });
+            TaskManager.executeTask(task, task.getDefaultTaskConfig());
+        }
     }//GEN-LAST:event_importSampleBtnActionPerformed
 
     private void gplViewBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_gplViewBtnActionPerformed
         int[] rows = platformTable.getSelectedRows();
-        for (int row : rows) {
-            String gplId = (String) platformTable.getModel().getValueAt(row, 0);
-            int index = sampleTabbedPane.indexOfTab(gplId);
-            if (index < 0) { // create a new tab and add to it
-                SOFTDownloadTask task = new SOFTDownloadTask(gplId, this);
-                JTaskConfig config = task.getDefaultTaskConfig();
-                boolean success = TaskManager.executeTask(task, config);
-            } else { // bring the tab into focus
-                sampleTabbedPane.setSelectedIndex(index);
-            }
+        String[] ids = new String[rows.length];
+        for (int i = 0; i < rows.length; i++) {
+            ids[i] = (String)platformTable.getModel().getValueAt(rows[i], 0);
         }
+        SOFTDownloadTask task = new SOFTDownloadTask(ids, this);
+        JTaskConfig config = task.getDefaultTaskConfig();
+        boolean success = TaskManager.executeTask(task, config);
     }//GEN-LAST:event_gplViewBtnActionPerformed
 
     private void viewGroupBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewGroupBtnActionPerformed
@@ -445,8 +439,6 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
     public static void main(String args[]) {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-		URL url;
-                InputStream in = null;
                 try {
                     SOFT gse = ExpressionReaderUtil.getSOFT("GSE9914", SOFT.Type.GSE, SOFT.Format.family);
 
@@ -462,13 +454,7 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
                     });
                     dialog.setVisible(true);
                 } catch (Exception ex) {
-                } finally {
-                    try {
-                        in.close();
-                    } catch (IOException ex) {
-                    }
-                }
-
+                } 
             }
         });
     }
@@ -506,15 +492,23 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
     private javax.swing.JPanel viewInBrowserPane;
     // End of variables declaration//GEN-END:variables
 
-    public void viewSOFT(SOFT soft) {
-        SOFTViewerPane pane = new SOFTViewerPane();
-        pane.setOwner(this);
-        pane.setSoft(soft);
-        sampleTabbedPane.add(soft.getId(), pane);
-        sampleTabbedPane.setSelectedComponent(pane);
-    }
-
     public void closeView(SOFT soft) {
         sampleTabbedPane.remove(sampleTabbedPane.indexOfTab(soft.getId()));
+    }
+
+    public void viewSOFT(List<SOFT> list) {
+        int index = -1;
+        for (SOFT soft : list) {
+            index = sampleTabbedPane.indexOfTab(soft.getId());
+            if (index >= 0) {
+                sampleTabbedPane.setSelectedIndex(index);
+            } else {
+                SOFTViewerPane pane = new SOFTViewerPane();
+                pane.setOwner(this);
+                pane.setSoft(soft);
+                sampleTabbedPane.add(soft.getId(), pane);
+                sampleTabbedPane.setSelectedComponent(pane);
+            }
+        }
     }
 }

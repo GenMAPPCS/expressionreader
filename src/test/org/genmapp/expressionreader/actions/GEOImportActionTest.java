@@ -52,30 +52,4 @@ public class GEOImportActionTest {
         fail("The test case is a prototype.");
     }
 
-    /**
-     * Test of viewSOFT method, of class GEOImportAction.
-     */
-    @Test
-    public void testViewSOFT() {
-        System.out.println("viewSOFT");
-        SOFT soft = null;
-        GEOImportAction instance = new GEOImportAction();
-        instance.viewSOFT(soft);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of closeView method, of class GEOImportAction.
-     */
-    @Test
-    public void testCloseView() {
-        System.out.println("closeView");
-        SOFT soft = null;
-        GEOImportAction instance = new GEOImportAction();
-        instance.closeView(soft);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
 }

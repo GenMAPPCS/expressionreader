@@ -24,6 +24,7 @@ import gov.nih.nlm.ncbi.soap.eutils.esummary.ESummaryRequest;
 import gov.nih.nlm.ncbi.soap.eutils.esummary.ESummaryResult;
 import gov.nih.nlm.ncbi.soap.eutils.esummary.ItemType;
 import java.awt.Dimension;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
@@ -268,22 +269,23 @@ public class GEOSearchDialog extends javax.swing.JDialog {
             Object value = resultTable.getModel().getValueAt(row, 0);
             if (value != null && !"".equals(value)) {
             // Download file
-            SOFTDownloadTask task = new SOFTDownloadTask((String)value, new SOFTViewer() {
+            SOFTDownloadTask task = new SOFTDownloadTask(new String[]{(String)value}, new SOFTViewer() {
 
-                    public void viewSOFT(SOFT soft) {
-                        if (soft.getType() == SOFT.Type.GSM) {
-                            GSMImportDialog dialog = new GSMImportDialog(Cytoscape.getDesktop(), false, soft);
-                            dialog.setVisible(true);
-                        } else if (soft.getType() == SOFT.Type.GSE) {
-                            GSEViewerDialog dialog = new GSEViewerDialog(Cytoscape.getDesktop(), false);
-                            dialog.setSOFT(soft);
-                            dialog.setVisible(true);
-                        } else if (soft.getType() == SOFT.Type.GDS) {
-                            GDSViewerDialog dialog = new GDSViewerDialog(Cytoscape.getDesktop(), false);
-                            dialog.setSOFT(soft);
-                            dialog.setVisible(true);
-                        } else if (soft.getType() == SOFT.Type.GPL) {
-                            ExpressionReaderUtil.showSOFTViewerDialog(Cytoscape.getDesktop(), false, soft);
+                    public void viewSOFT(List<SOFT> list) {
+                        for (SOFT soft : list) {
+                            if (soft.getType() == SOFT.Type.GSE) {
+                                GSEViewerDialog dialog = new GSEViewerDialog(Cytoscape.getDesktop(), false);
+                                dialog.setSOFT(soft);
+                                dialog.setVisible(true);
+                            } else if (soft.getType() == SOFT.Type.GDS) {
+                                GDSViewerDialog dialog = new GDSViewerDialog(Cytoscape.getDesktop(), false);
+                                dialog.setSOFT(soft);
+                                dialog.setVisible(true);
+                            } else if (soft.getType() == SOFT.Type.GPL) {
+                                ExpressionReaderUtil.showSOFTViewerDialog(Cytoscape.getDesktop(), false, soft);
+                            } else {
+                                throw new UnsupportedOperationException("Wrong SOFT type: " + soft.getType() + ", Should be GSE/GDS/GPL");
+                            }
                         }
                     }
 
@@ -310,6 +312,7 @@ public class GEOSearchDialog extends javax.swing.JDialog {
             public void run() {
                 GEOSearchDialog dialog = new GEOSearchDialog(new javax.swing.JFrame(), true);
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
+                    @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {
                         System.exit(0);
                     }

@@ -22,7 +22,7 @@ public class GEOSearchAction extends CytoscapeAction {
 
     @Override
     public void actionPerformed(ActionEvent ae) {
-        GEOSearchDialog dialog = new GEOSearchDialog(Cytoscape.getDesktop(), true);
+        GEOSearchDialog dialog = new GEOSearchDialog(Cytoscape.getDesktop(), false);
         dialog.setVisible(true);
     }
 

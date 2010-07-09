@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
+import javax.swing.JTabbedPane;
 import javax.swing.WindowConstants;
 import org.genmapp.expressionreader.ui.SOFTViewer;
 import org.genmapp.expressionreader.ui.SOFTViewerPane;
@@ -279,10 +280,10 @@ public class ExpressionReaderUtil {
         SOFTViewerPane pane = new SOFTViewerPane();
         pane.setSoft(soft);
         dialog.setContentPane(pane);
-        dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+
         pane.setOwner(new SOFTViewer() {
 
-            public void viewSOFT(SOFT soft) {
+            public void viewSOFT(List<SOFT> soft) {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
 
@@ -290,7 +291,49 @@ public class ExpressionReaderUtil {
                 fdialog.dispose();
             }
         });
+
         dialog.setSize(600, 760);
+        dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        dialog.setVisible(true);
+        return dialog;
+    }
+
+    public static JDialog showSOFTViewerDialog(Container parent, boolean modal, List<SOFT> list) {
+        if (list == null || list.isEmpty()) return null;
+        if (list.size() == 1) return showSOFTViewerDialog(parent, modal, list.get(0));
+        JDialog dialog = null;
+        if (parent instanceof Frame) {
+            dialog = new JDialog((Frame) parent, modal);
+        } else if (parent instanceof JDialog) {
+            dialog = new JDialog((JDialog)parent, modal);
+        }
+        if (dialog == null) return null;
+
+        final JDialog fdialog = dialog;
+        final JTabbedPane tabs = new JTabbedPane();
+        fdialog.setContentPane(tabs);
+
+        for (SOFT soft: list) {
+            SOFTViewerPane pane = new SOFTViewerPane();
+            pane.setSoft(soft);
+            tabs.add(soft.getId(), pane);
+            pane.setOwner(new SOFTViewer() {
+
+                public void viewSOFT(List<SOFT> soft) {
+                    throw new UnsupportedOperationException("Not supported yet.");
+                }
+
+                public void closeView(SOFT soft) {
+                    tabs.removeTabAt(tabs.indexOfTab(soft.getId()));
+                    if (tabs.getTabCount() == 0) {
+                        fdialog.dispose();
+                    }
+                }
+            });
+        }
+        
+        dialog.setSize(600, 760);
+        dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         dialog.setVisible(true);
         return dialog;
     }

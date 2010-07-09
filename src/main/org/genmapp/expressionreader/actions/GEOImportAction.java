@@ -10,6 +10,7 @@ import cytoscape.Cytoscape;
 import cytoscape.task.ui.JTaskConfig;
 import cytoscape.task.util.TaskManager;
 import cytoscape.util.CytoscapeAction;
+import java.util.List;
 import org.genmapp.expressionreader.ExpressionReaderUtil;
 import org.genmapp.expressionreader.tasks.SOFTDownloadTask;
 import org.genmapp.expressionreader.ui.GDSViewerDialog;
@@ -33,26 +34,28 @@ public class GEOImportAction extends CytoscapeAction implements SOFTViewer {
 
         if (response != null && !"".equals(response.trim())) {
             // Download file
-            SOFTDownloadTask task = new SOFTDownloadTask(response.trim(), this);
+            SOFTDownloadTask task = new SOFTDownloadTask(new String[]{response.trim()}, this);
             JTaskConfig config = task.getDefaultTaskConfig();
             TaskManager.executeTask(task, config);
         }
     }
 
-    public void viewSOFT(SOFT soft) {
+    public void viewSOFT(List<SOFT> list) { // should expect only one back
+        SOFT soft = list.get(0);
         if (soft.getType() == SOFT.Type.GSM) {
-            GSMImportDialog dialog = new GSMImportDialog(Cytoscape.getDesktop(), true, soft);
+            GSMImportDialog dialog = new GSMImportDialog(Cytoscape.getDesktop(), false);
+            dialog.setSOFTList(list);
             dialog.setVisible(true);
         } else if (soft.getType() == SOFT.Type.GSE) {
-            GSEViewerDialog dialog = new GSEViewerDialog(Cytoscape.getDesktop(), true);
+            GSEViewerDialog dialog = new GSEViewerDialog(Cytoscape.getDesktop(), false);
             dialog.setSOFT(soft);
             dialog.setVisible(true);
         } else if (soft.getType() == SOFT.Type.GDS) {
-            GDSViewerDialog dialog = new GDSViewerDialog(Cytoscape.getDesktop(), true);
+            GDSViewerDialog dialog = new GDSViewerDialog(Cytoscape.getDesktop(), false);
             dialog.setSOFT(soft);
             dialog.setVisible(true);
         } else if (soft.getType() == SOFT.Type.GPL) {
-            ExpressionReaderUtil.showSOFTViewerDialog(Cytoscape.getDesktop(), true, soft);
+            ExpressionReaderUtil.showSOFTViewerDialog(Cytoscape.getDesktop(), false, soft);
         }
     }
 

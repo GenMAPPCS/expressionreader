@@ -14,6 +14,7 @@ package org.genmapp.expressionreader.ui;
 import cytoscape.Cytoscape;
 import cytoscape.task.ui.JTaskConfig;
 import cytoscape.task.util.TaskManager;
+import java.util.List;
 import java.util.Map;
 import javax.swing.JDialog;
 import javax.swing.table.AbstractTableModel;
@@ -123,7 +124,7 @@ public class GDSSubsetViewerPane extends javax.swing.JPanel implements SOFTViewe
             String gsmId = (String) sampleTable.getModel().getValueAt(row, 0);
             int index = sampleTabbedPane.indexOfTab(gsmId);
             if (index < 0) { // create a new tab and add to it
-                SOFTDownloadTask task = new SOFTDownloadTask(gsmId, this);
+                SOFTDownloadTask task = new SOFTDownloadTask(new String[]{gsmId}, this);
                 JTaskConfig config = task.getDefaultTaskConfig();
                 boolean success = TaskManager.executeTask(task, config);
             } else { // bring the tab into focus
@@ -133,12 +134,17 @@ public class GDSSubsetViewerPane extends javax.swing.JPanel implements SOFTViewe
     }//GEN-LAST:event_viewSampleBtnActionPerformed
 
     private void importBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importBtnActionPerformed
-        String gsmId = (String)sampleTable.getModel().getValueAt(sampleTable.getSelectedRow(), 0);
-        if (gsmId != null && !"".equals(gsmId)) {
-            SOFTDownloadTask task = new SOFTDownloadTask(gsmId, new SOFTViewer() {
+        int[] rows = sampleTable.getSelectedRows();
+        String[] ids = new String[rows.length];
+        for (int i = 0; i < rows.length; i++) {
+            ids[i] = (String)sampleTable.getModel().getValueAt(rows[i], 0);
+        }
+        if (ids.length > 0) {
+            SOFTDownloadTask task = new SOFTDownloadTask(ids, new SOFTViewer() {
 
-                public void viewSOFT(SOFT soft) {
-                    GSMImportDialog dialog = new GSMImportDialog(Cytoscape.getDesktop(), true, soft);
+                public void viewSOFT(List<SOFT> list) {
+                    GSMImportDialog dialog = new GSMImportDialog(Cytoscape.getDesktop(), false);
+                    dialog.setSOFTList(list);
                     dialog.setVisible(true);
                 }
 
@@ -219,12 +225,14 @@ public class GDSSubsetViewerPane extends javax.swing.JPanel implements SOFTViewe
         this.sampleTable.setModel(model);
     }
 
-    public void viewSOFT(SOFT soft) {
-        SOFTViewerPane pane = new SOFTViewerPane();
-        pane.setOwner(this);
-        pane.setSoft(soft);
-        sampleTabbedPane.add(soft.getId(), pane);
-        sampleTabbedPane.setSelectedComponent(pane);
+    public void viewSOFT(List<SOFT> list) {
+        for (SOFT soft: list) {
+            SOFTViewerPane pane = new SOFTViewerPane();
+            pane.setOwner(this);
+            pane.setSoft(soft);
+            sampleTabbedPane.add(soft.getId(), pane);
+            sampleTabbedPane.setSelectedComponent(pane);
+        }
     }
 
     public void closeView(SOFT soft) {
