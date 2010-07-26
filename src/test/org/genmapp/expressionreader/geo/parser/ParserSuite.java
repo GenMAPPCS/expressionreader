@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package org.genmapp.expressionreader;
+package org.genmapp.expressionreader.geo.parser;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -17,8 +17,8 @@ import org.junit.runners.Suite;
  * @author djiao
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({org.genmapp.expressionreader.geo.parser.ParserSuite.class,org.genmapp.expressionreader.tasks.TasksSuite.class,org.genmapp.expressionreader.ExpressionReaderPluginTest.class})
-public class ExpressionreaderSuite {
+@Suite.SuiteClasses({org.genmapp.expressionreader.geo.parser.SOFTParserTest.class})
+public class ParserSuite {
 
     @BeforeClass
     public static void setUpClass() throws Exception {

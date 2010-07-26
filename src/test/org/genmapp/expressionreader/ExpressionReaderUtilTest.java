@@ -5,12 +5,13 @@
 
 package org.genmapp.expressionreader;
 
-import org.genmapp.expressionreader.data.GSE;
+import org.genmapp.expressionreader.geo.GEOQuery;
+import org.genmapp.expressionreader.geo.data.GSE;
 import java.util.List;
-import org.genmapp.expressionreader.data.GDS;
-import org.genmapp.expressionreader.data.SOFT;
+import org.genmapp.expressionreader.geo.data.GDS;
+import org.genmapp.expressionreader.geo.data.SOFT;
 import java.io.File;
-import org.genmapp.expressionreader.data.SOFT.Type;
+import org.genmapp.expressionreader.geo.data.SOFT.Type;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -45,32 +46,32 @@ public class ExpressionReaderUtilTest {
 
     @Test
     public void testDownloadSOFTGZ() throws Exception {
-        String url = String.format(ExpressionReaderUtil.GDS_FTP, "GDS507");
-        boolean result = ExpressionReaderUtil.downloadSOFTGZ(url, new File(System.getProperty("java.io.tmpdir"), "GDS507.soft"));
+        String url = String.format(GEOQuery.GDS_FTP, "GDS507");
+        boolean result = GEOQuery.downloadSOFTGZ(url, new File(System.getProperty("java.io.tmpdir"), "GDS507.soft"));
         assertEquals(true, result);
         assertEquals(true, new File(System.getProperty("java.io.tmpdir"), "GDS507.soft").exists());
     }
 
     @Test
     public void testGetGDS() throws Exception {
-        GDS soft = (GDS)ExpressionReaderUtil.getGDS("GDS507");
+        GDS soft = (GDS)GEOQuery.getGDS("GDS507");
         assertNotNull(soft);
         assertEquals(12, soft.getSubsets().size());
 
-        SOFT gsm = (SOFT)ExpressionReaderUtil.getGDS("GSM11805");
+        SOFT gsm = (SOFT)GEOQuery.getGDS("GSM11805");
         assertEquals(22283, gsm.getDataTables().getFirst().getData().size());
     }
 
     @Test
     public void testGetGSE() throws Exception {
-        GSE soft = (GSE) ExpressionReaderUtil.getGSE("GSE8854", SOFT.Format.full);
+        GSE soft = (GSE) GEOQuery.getGSE("GSE8854", SOFT.Format.full);
         assertNotNull(soft);
         assertEquals(9, soft.getPlatforms().size());
     }
 
     @Test
     public void testGetGSE2() throws Exception {
-        GSE soft = (GSE) ExpressionReaderUtil.getGSE("GSE9914", SOFT.Format.quick);
+        GSE soft = (GSE) GEOQuery.getGSE("GSE9914", SOFT.Format.quick);
         assertNotNull(soft);
         assertEquals(6, soft.getDataTables().size());
     }
@@ -84,7 +85,7 @@ public class ExpressionReaderUtilTest {
         String urlStr = "";
         File file = null;
         boolean expResult = false;
-        boolean result = ExpressionReaderUtil.downloadURL(urlStr, file);
+        boolean result = GEOQuery.downloadURL(urlStr, file);
         assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
@@ -97,7 +98,7 @@ public class ExpressionReaderUtilTest {
     public void testOpenURL() {
         System.out.println("openURL");
         String url = "";
-        ExpressionReaderUtil.openURL(url);
+        GEOQuery.openURL(url);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }
@@ -111,7 +112,7 @@ public class ExpressionReaderUtilTest {
         List<? extends CharSequence> s = null;
         String delimiter = "";
         String expResult = "";
-        String result = ExpressionReaderUtil.join(s, delimiter);
+        String result = GEOQuery.join(s, delimiter);
         assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
@@ -125,7 +126,7 @@ public class ExpressionReaderUtilTest {
         System.out.println("getSoftNameLblText");
         SOFT soft = null;
         String expResult = "";
-        String result = ExpressionReaderUtil.getSoftNameLblText(soft);
+        String result = GEOQuery.getSoftNameLblText(soft);
         assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
@@ -139,7 +140,7 @@ public class ExpressionReaderUtilTest {
         System.out.println("getType");
         String geoId = "";
         Type expResult = null;
-        Type result = ExpressionReaderUtil.getType(geoId);
+        Type result = GEOQuery.getType(geoId);
         assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
