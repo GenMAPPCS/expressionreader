@@ -4,17 +4,16 @@
  * Created on Jul 1, 2010, 9:27:54 AM
  */
 
-package org.genmapp.expressionreader.ui;
+package org.genmapp.expressionreader.geo.ui;
 
-import org.genmapp.expressionreader.tasks.SOFTViewer;
-import org.genmapp.expressionreader.data.SOFT;
-import org.genmapp.expressionreader.ExpressionReaderUtil;
+import org.genmapp.expressionreader.geo.data.SOFT;
+import org.genmapp.expressionreader.geo.GEOQuery;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.AbstractTableModel;
-import org.genmapp.expressionreader.data.DataTable;
+import org.genmapp.expressionreader.geo.data.DataTable;
 
 /**
  *
@@ -44,7 +43,7 @@ public class SOFTViewerPane extends javax.swing.JPanel {
     public void setSoft(final SOFT soft) {
         this.soft = soft;
 
-        sampleNameLbl.setText(org.genmapp.expressionreader.ExpressionReaderUtil.getSoftNameLblText(soft));
+        sampleNameLbl.setText(org.genmapp.expressionreader.geo.GEOQuery.getSoftNameLblText(soft));
         int total = soft.getDataTables().getFirst().getData().size();
         int numOfRows = total > 20 ? 20 : total;
             TitledBorder border = (TitledBorder)dataWrapperPane.getBorder();
@@ -67,20 +66,18 @@ public class SOFTViewerPane extends javax.swing.JPanel {
                         return obj;
                     } else {
                         List<String> list = (List) obj;
-                        return org.genmapp.expressionreader.ExpressionReaderUtil.join(list, "\n");
+                        return org.genmapp.expressionreader.geo.GEOQuery.join(list, "\n");
                     }
                 }
             }
 
             @Override
             public int getRowCount() {
-                // TODO Auto-generated method stub
                 return soft.getFields().size();
             }
 
             @Override
             public int getColumnCount() {
-                // TODO Auto-generated method stub
                 return 2;
             }
 
@@ -227,8 +224,8 @@ public class SOFTViewerPane extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void viewInBrowserBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewInBrowserBtnActionPerformed
-        String url = String.format(ExpressionReaderUtil.GEO_URL, soft.getId(), "html", SOFT.Format.quick);
-        ExpressionReaderUtil.openURL(url);
+        String url = String.format(GEOQuery.GEO_URL, soft.getId(), "html", SOFT.Format.quick);
+        GEOQuery.openURL(url);
 }//GEN-LAST:event_viewInBrowserBtnActionPerformed
 
     private void closeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_closeButtonActionPerformed

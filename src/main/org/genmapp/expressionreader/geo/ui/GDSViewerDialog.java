@@ -9,13 +9,12 @@
  * Created on Jul 2, 2010, 2:22:37 PM
  */
 
-package org.genmapp.expressionreader.ui;
+package org.genmapp.expressionreader.geo.ui;
 
-import org.genmapp.expressionreader.tasks.SOFTViewer; 
 import java.util.List;
-import org.genmapp.expressionreader.ExpressionReaderUtil;
-import org.genmapp.expressionreader.data.GDS;
-import org.genmapp.expressionreader.data.SOFT;
+import org.genmapp.expressionreader.geo.GEOQuery;
+import org.genmapp.expressionreader.geo.data.GDS;
+import org.genmapp.expressionreader.geo.data.SOFT;
 
 /**
  *
@@ -41,7 +40,7 @@ public class GDSViewerDialog extends javax.swing.JDialog implements SOFTViewer {
     private void initComponents() {
 
         jSplitPane1 = new javax.swing.JSplitPane();
-        softViewerPane = new org.genmapp.expressionreader.ui.SOFTViewerPane();
+        softViewerPane = new org.genmapp.expressionreader.geo.ui.SOFTViewerPane();
         subsetTabbedPane = new javax.swing.JTabbedPane();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -62,7 +61,7 @@ public class GDSViewerDialog extends javax.swing.JDialog implements SOFTViewer {
     * @param args the command line arguments
     */
     public static void main(String args[]) throws Exception {
-        final SOFT soft = ExpressionReaderUtil.getGDS("GDS507");
+        final SOFT soft = GEOQuery.getGDS("GDS507");
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 GDSViewerDialog dialog = new GDSViewerDialog(new javax.swing.JFrame(), true);
@@ -79,7 +78,7 @@ public class GDSViewerDialog extends javax.swing.JDialog implements SOFTViewer {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JSplitPane jSplitPane1;
-    private org.genmapp.expressionreader.ui.SOFTViewerPane softViewerPane;
+    private org.genmapp.expressionreader.geo.ui.SOFTViewerPane softViewerPane;
     private javax.swing.JTabbedPane subsetTabbedPane;
     // End of variables declaration//GEN-END:variables
 

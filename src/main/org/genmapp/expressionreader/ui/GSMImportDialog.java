@@ -1,6 +1,6 @@
 package org.genmapp.expressionreader.ui;
 
-import org.genmapp.expressionreader.tasks.SOFTViewer;
+import org.genmapp.expressionreader.geo.ui.SOFTViewer;
 import cytoscape.CyNetwork;
 import cytoscape.CyNode;
 import cytoscape.Cytoscape;
@@ -9,15 +9,10 @@ import cytoscape.cythesaurus.CyThesaurusServiceMessageBasedClient;
 import cytoscape.data.CyAttributes;
 import cytoscape.task.ui.JTaskConfig;
 import cytoscape.task.util.TaskManager;
-import org.genmapp.expressionreader.data.DataTable;
-import org.genmapp.expressionreader.data.SOFT;
-import org.genmapp.expressionreader.ExpressionReaderUtil;
-import org.genmapp.expressionreader.parser.SOFTParser;
+import org.genmapp.expressionreader.geo.data.DataTable;
+import org.genmapp.expressionreader.geo.data.SOFT;
 import org.genmapp.expressionreader.tasks.AbstractTask;
 import org.genmapp.expressionreader.tasks.SOFTDownloadTask;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -30,6 +25,8 @@ import java.util.Map;
 import java.util.Set;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
+import org.genmapp.expressionreader.geo.GEOQuery;
+import org.genmapp.expressionreader.geo.ui.GEOQueryUI;
 
 /**
  *
@@ -325,6 +322,8 @@ public class GSMImportDialog extends javax.swing.JDialog implements SOFTViewer {
         config.setAutoDispose(false);
         config.setModal(false);
         config.displayStatus(true);
+        config.displayCancelButton(true);
+        config.displayCloseButton(true);
         config.setOwner(Cytoscape.getDesktop());
 
         //this.setVisible(false);
@@ -452,13 +451,13 @@ public class GSMImportDialog extends javax.swing.JDialog implements SOFTViewer {
 
     private void viewInBrowserBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewInBrowserBtnActionPerformed
         for (SOFT soft : softList) {
-            String url = String.format(ExpressionReaderUtil.GEO_URL, soft.getId(), "html", "quick");
-            ExpressionReaderUtil.openURL(url);
+            String url = String.format(GEOQuery.GEO_URL, soft.getId(), "html", "quick");
+            GEOQuery.openURL(url);
         }
     }//GEN-LAST:event_viewInBrowserBtnActionPerformed
 
     private void viewSampleDataBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewSampleDataBtnActionPerformed
-        ExpressionReaderUtil.showSOFTViewerDialog(this, false, softList);
+        GEOQueryUI.showSOFTViewerDialog(this, false, softList);
     }//GEN-LAST:event_viewSampleDataBtnActionPerformed
     private void idMapConfigBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_idMapConfigBtnActionPerformed
         boolean result = client.openMappingResourceConfigDialog();
@@ -481,7 +480,7 @@ public class GSMImportDialog extends javax.swing.JDialog implements SOFTViewer {
             JTaskConfig config = task.getDefaultTaskConfig();
             TaskManager.executeTask(task, config);
         } else if ("View GPL Data".equals(evt.getActionCommand())) {
-            ExpressionReaderUtil.showSOFTViewerDialog(this, false, gplList);
+            GEOQueryUI.showSOFTViewerDialog(this, false, gplList);
         }
     }//GEN-LAST:event_importGPLBtnActionPerformed
 
@@ -493,7 +492,7 @@ public class GSMImportDialog extends javax.swing.JDialog implements SOFTViewer {
 
             public void run() {
                 try {
-                    SOFT gsm = ExpressionReaderUtil.getSOFT("GSM207569", SOFT.Format.full);
+                    SOFT gsm = GEOQuery.getSOFT("GSM207569", SOFT.Format.full);
                     GSMImportDialog dialog = new GSMImportDialog(new javax.swing.JFrame(), true);
                     List<SOFT> softList = new ArrayList<SOFT>();
                     softList.add(gsm);

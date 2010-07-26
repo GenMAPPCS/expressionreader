@@ -1,4 +1,4 @@
-package org.genmapp.expressionreader.data;
+package org.genmapp.expressionreader.geo.data;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedList;

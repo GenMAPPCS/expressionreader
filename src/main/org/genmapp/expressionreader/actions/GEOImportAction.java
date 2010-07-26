@@ -1,6 +1,6 @@
 package org.genmapp.expressionreader.actions;
 
-import org.genmapp.expressionreader.data.SOFT;
+import org.genmapp.expressionreader.geo.data.SOFT;
 
 import java.awt.event.ActionEvent;
 
@@ -11,12 +11,13 @@ import cytoscape.task.ui.JTaskConfig;
 import cytoscape.task.util.TaskManager;
 import cytoscape.util.CytoscapeAction;
 import java.util.List;
-import org.genmapp.expressionreader.ExpressionReaderUtil;
+import org.genmapp.expressionreader.geo.GEOQuery;
 import org.genmapp.expressionreader.tasks.SOFTDownloadTask;
-import org.genmapp.expressionreader.ui.GDSViewerDialog;
-import org.genmapp.expressionreader.ui.GSEViewerDialog;
+import org.genmapp.expressionreader.geo.ui.GDSViewerDialog;
+import org.genmapp.expressionreader.geo.ui.GEOQueryUI;
+import org.genmapp.expressionreader.geo.ui.GSEViewerDialog;
 import org.genmapp.expressionreader.ui.GSMImportDialog;
-import org.genmapp.expressionreader.tasks.SOFTViewer;
+import org.genmapp.expressionreader.geo.ui.SOFTViewer;
 
 public class GEOImportAction extends CytoscapeAction implements SOFTViewer {
 
@@ -35,7 +36,7 @@ public class GEOImportAction extends CytoscapeAction implements SOFTViewer {
         if (response != null && !"".equals(response.trim())) {
             // Download file
             String id = response.trim();
-            SOFT.Type type = ExpressionReaderUtil.getType(id);
+            SOFT.Type type = GEOQuery.getType(id);
 
             SOFTDownloadTask task = (type == SOFT.Type.GSM) ?
                 new SOFTDownloadTask(new String[]{id}, this, SOFT.Format.full) :
@@ -61,7 +62,7 @@ public class GEOImportAction extends CytoscapeAction implements SOFTViewer {
             dialog.setSOFT(soft);
             dialog.setVisible(true);
         } else if (soft.getType() == SOFT.Type.GPL) {
-            ExpressionReaderUtil.showSOFTViewerDialog(Cytoscape.getDesktop(), false, soft);
+            GEOQueryUI.showSOFTViewerDialog(Cytoscape.getDesktop(), false, soft);
         }
     }
 

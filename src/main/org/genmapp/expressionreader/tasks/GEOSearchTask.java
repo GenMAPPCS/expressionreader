@@ -14,7 +14,7 @@ import gov.nih.nlm.ncbi.soap.eutils.esummary.ESummaryRequest;
 import gov.nih.nlm.ncbi.soap.eutils.esummary.ESummaryResult;
 import java.util.List;
 import javax.swing.SwingUtilities;
-import org.genmapp.expressionreader.ExpressionReaderUtil;
+import org.genmapp.expressionreader.geo.GEOQuery;
 
 /**
  *
@@ -36,7 +36,7 @@ public class GEOSearchTask extends AbstractTask {
         EUtilsServiceSoap clientStub = service.getEUtilsServiceSoap();
         final ESearchResult result = clientStub.runESearch(query);
         final int total = Integer.parseInt(result.getCount());
-        String ids = ExpressionReaderUtil.join(result.getIdList().getId(), ",");
+        String ids = GEOQuery.join(result.getIdList().getId(), ",");
 
         ESummaryRequest req = new ESummaryRequest();
         req.setDb("gds");

@@ -3,10 +3,10 @@
  * and open the template in the editor.
  */
 
-package org.genmapp.expressionreader.tasks;
+package org.genmapp.expressionreader.geo.ui;
 
 import java.util.List;
-import org.genmapp.expressionreader.data.SOFT;
+import org.genmapp.expressionreader.geo.data.SOFT;
 
 /**
  *

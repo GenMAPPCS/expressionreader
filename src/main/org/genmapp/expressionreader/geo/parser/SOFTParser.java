@@ -1,9 +1,9 @@
-package org.genmapp.expressionreader.parser;
+package org.genmapp.expressionreader.geo.parser;
 
-import org.genmapp.expressionreader.data.DataTable;
-import org.genmapp.expressionreader.data.GSE;
-import org.genmapp.expressionreader.data.SOFT;
-import org.genmapp.expressionreader.data.SOFT.Type;
+import org.genmapp.expressionreader.geo.data.DataTable;
+import org.genmapp.expressionreader.geo.data.GSE;
+import org.genmapp.expressionreader.geo.data.SOFT;
+import org.genmapp.expressionreader.geo.data.SOFT.Type;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,7 +20,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.genmapp.expressionreader.data.GDS;
+import org.genmapp.expressionreader.geo.data.GDS;
 
 public class SOFTParser {
 

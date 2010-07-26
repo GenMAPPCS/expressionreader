@@ -5,10 +5,11 @@
 
 package org.genmapp.expressionreader.tasks;
 
+import org.genmapp.expressionreader.geo.ui.SOFTViewer;
 import cytoscape.task.ui.JTaskConfig;
-import org.genmapp.expressionreader.data.SOFT;
-import org.genmapp.expressionreader.data.SOFT.Format;
-import org.genmapp.expressionreader.ExpressionReaderUtil;
+import org.genmapp.expressionreader.geo.data.SOFT;
+import org.genmapp.expressionreader.geo.data.SOFT.Format;
+import org.genmapp.expressionreader.geo.GEOQuery;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -46,7 +47,7 @@ public class SOFTDownloadTask extends AbstractTask {
                 if (taskMonitor != null) {
                     taskMonitor.setStatus("Retrieving data from GEO: " + geoID);
                 }
-                SOFT soft = ExpressionReaderUtil.getSOFT(geoID, format);
+                SOFT soft = GEOQuery.getSOFT(geoID, format);
                 softList.add(soft);
             }
             final List<SOFT> flist = softList;

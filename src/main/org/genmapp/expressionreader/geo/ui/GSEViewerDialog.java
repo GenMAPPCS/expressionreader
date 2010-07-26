@@ -9,14 +9,13 @@
  * Created on Jun 30, 2010, 10:23:05 AM
  */
 
-package org.genmapp.expressionreader.ui;
+package org.genmapp.expressionreader.geo.ui;
 
-import org.genmapp.expressionreader.tasks.SOFTViewer;
 import cytoscape.Cytoscape;
 import cytoscape.task.ui.JTaskConfig;
 import cytoscape.task.util.TaskManager;
-import org.genmapp.expressionreader.data.SOFT;
-import org.genmapp.expressionreader.ExpressionReaderUtil;
+import org.genmapp.expressionreader.geo.data.SOFT;
+import org.genmapp.expressionreader.geo.GEOQuery;
 import org.genmapp.expressionreader.tasks.SOFTDownloadTask;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -26,8 +25,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.AbstractTableModel;
-import org.genmapp.expressionreader.data.DataTable;
-import org.genmapp.expressionreader.data.GSE;
+import org.genmapp.expressionreader.geo.data.DataTable;
+import org.genmapp.expressionreader.geo.data.GSE;
+import org.genmapp.expressionreader.ui.GSMImportDialog;
 
 /**
  *
@@ -134,20 +134,18 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
                         return obj;
                     } else {
                         List<String> list = (List) obj;
-                        return org.genmapp.expressionreader.ExpressionReaderUtil.join(list, "\n");
+                        return org.genmapp.expressionreader.geo.GEOQuery.join(list, "\n");
                     }
                 }
             }
 
             @Override
             public int getRowCount() {
-                // TODO Auto-generated method stub
                 return gse.getFields().size();
             }
 
             @Override
             public int getColumnCount() {
-                // TODO Auto-generated method stub
                 return 2;
             }
 
@@ -157,7 +155,7 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
             }
         });
 
-        nameLbl.setText(org.genmapp.expressionreader.ExpressionReaderUtil.getSoftNameLblText(soft));
+        nameLbl.setText(org.genmapp.expressionreader.geo.GEOQuery.getSoftNameLblText(soft));
     }
 
     /** This method is called from within the constructor to
@@ -370,8 +368,8 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
     }//GEN-LAST:event_viewSampleBtnActionPerformed
 
     private void viewInBroswerBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewInBroswerBtnActionPerformed
-        String url = String.format(ExpressionReaderUtil.GEO_URL, soft.getId(), "html", SOFT.Format.quick);
-        ExpressionReaderUtil.openURL(url);
+        String url = String.format(GEOQuery.GEO_URL, soft.getId(), "html", SOFT.Format.quick);
+        GEOQuery.openURL(url);
     }//GEN-LAST:event_viewInBroswerBtnActionPerformed
 
     private void importSampleBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importSampleBtnActionPerformed
@@ -474,7 +472,7 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 try {
-                    SOFT gse = ExpressionReaderUtil.getGSE("GSE9914", SOFT.Format.quick);
+                    SOFT gse = GEOQuery.getGSE("GSE9914", SOFT.Format.quick);
 
                     GSEViewerDialog dialog = new GSEViewerDialog(new javax.swing.JFrame(), true);
                     dialog.setSOFT(gse);

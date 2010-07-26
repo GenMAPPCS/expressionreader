@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package org.genmapp.expressionreader.data;
+package org.genmapp.expressionreader.geo.data;
 
 import java.util.LinkedHashMap;
 import java.util.List;

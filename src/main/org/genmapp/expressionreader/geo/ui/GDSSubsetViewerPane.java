@@ -9,9 +9,8 @@
  * Created on Jul 7, 2010, 11:07:09 PM
  */
 
-package org.genmapp.expressionreader.ui;
+package org.genmapp.expressionreader.geo.ui;
 
-import org.genmapp.expressionreader.tasks.SOFTViewer;
 import cytoscape.Cytoscape;
 import cytoscape.task.ui.JTaskConfig;
 import cytoscape.task.util.TaskManager;
@@ -19,10 +18,11 @@ import java.util.List;
 import java.util.Map;
 import javax.swing.JDialog;
 import javax.swing.table.AbstractTableModel;
-import org.genmapp.expressionreader.ExpressionReaderUtil;
-import org.genmapp.expressionreader.data.GDS;
-import org.genmapp.expressionreader.data.SOFT;
+import org.genmapp.expressionreader.geo.GEOQuery;
+import org.genmapp.expressionreader.geo.data.GDS;
+import org.genmapp.expressionreader.geo.data.SOFT;
 import org.genmapp.expressionreader.tasks.SOFTDownloadTask;
+import org.genmapp.expressionreader.ui.GSMImportDialog;
 
 /**
  *
@@ -253,7 +253,7 @@ public class GDSSubsetViewerPane extends javax.swing.JPanel implements SOFTViewe
     }
 
     public static void main(String[] args) throws Exception {
-        final SOFT soft = ExpressionReaderUtil.getGDS("GDS507");
+        final SOFT soft = GEOQuery.getGDS("GDS507");
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 JDialog dialog = new JDialog();

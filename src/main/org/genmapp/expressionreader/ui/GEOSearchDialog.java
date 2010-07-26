@@ -11,7 +11,9 @@
 
 package org.genmapp.expressionreader.ui;
 
-import org.genmapp.expressionreader.tasks.SOFTViewer;
+import org.genmapp.expressionreader.geo.ui.GDSViewerDialog;
+import org.genmapp.expressionreader.geo.ui.GSEViewerDialog;
+import org.genmapp.expressionreader.geo.ui.SOFTViewer;
 import cytoscape.Cytoscape;
 import cytoscape.task.Task;
 import cytoscape.task.ui.JTaskConfig;
@@ -23,8 +25,9 @@ import java.awt.Dimension;
 import java.util.List;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
-import org.genmapp.expressionreader.ExpressionReaderUtil;
-import org.genmapp.expressionreader.data.SOFT;
+import org.genmapp.expressionreader.geo.GEOQuery;
+import org.genmapp.expressionreader.geo.data.SOFT;
+import org.genmapp.expressionreader.geo.ui.GEOQueryUI;
 import org.genmapp.expressionreader.tasks.GEOSearchTask;
 import org.genmapp.expressionreader.tasks.SOFTDownloadTask;
 import org.genmapp.expressionreader.tasks.SearchResultViewer;
@@ -262,7 +265,7 @@ public class GEOSearchDialog extends javax.swing.JDialog implements SearchResult
                                 dialog.setSOFT(soft);
                                 dialog.setVisible(true);
                             } else if (soft.getType() == SOFT.Type.GPL) {
-                                ExpressionReaderUtil.showSOFTViewerDialog(Cytoscape.getDesktop(), false, soft);
+                                GEOQueryUI.showSOFTViewerDialog(Cytoscape.getDesktop(), false, soft);
                             } else {
                                 throw new UnsupportedOperationException("Wrong SOFT type: " + soft.getType() + ", Should be GSE/GDS/GPL");
                             }
