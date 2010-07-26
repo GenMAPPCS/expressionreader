@@ -5,6 +5,7 @@
 
 package org.genmapp.expressionreader.tasks;
 
+import cytoscape.logger.CyLogger;
 import org.genmapp.expressionreader.geo.ui.SOFTViewer;
 import cytoscape.task.ui.JTaskConfig;
 import org.genmapp.expressionreader.geo.data.SOFT;
@@ -21,7 +22,7 @@ import javax.swing.SwingUtilities;
  * @author djiao
  */
 public class SOFTDownloadTask extends AbstractTask {
-
+    static public CyLogger logger = CyLogger.getLogger(SOFTDownloadTask.class);
     private String[] geoIDs;
     private SOFTViewer viewer;
     private SOFT.Format format = SOFT.Format.quick;
@@ -41,6 +42,7 @@ public class SOFTDownloadTask extends AbstractTask {
     }
 
     public void run() {
+        logger.debug("Downloading " + geoIDs.length + "SOFT files. start ...");
         try {
             List<SOFT> softList = new ArrayList<SOFT>();
             for (String geoID : geoIDs ) {
@@ -51,6 +53,9 @@ public class SOFTDownloadTask extends AbstractTask {
                 softList.add(soft);
             }
             final List<SOFT> flist = softList;
+
+            logger.debug("Downloaded " + softList.size() + " files");
+
             // Configures a mapping after the download
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
@@ -58,7 +63,11 @@ public class SOFTDownloadTask extends AbstractTask {
                 }
             });
         } catch (IOException ex) {
+            logger.error(ex.getMessage(), ex);
+            ex.printStackTrace();
         } catch (ParseException ex) {
+            logger.error(ex.getMessage(), ex);
+            ex.printStackTrace();
         }
     }
 

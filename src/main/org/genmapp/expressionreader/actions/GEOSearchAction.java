@@ -26,5 +26,4 @@ public class GEOSearchAction extends CytoscapeAction {
         dialog.setSize(800, 500);
         dialog.setVisible(true);
     }
-
 }

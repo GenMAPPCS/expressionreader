@@ -1,7 +1,5 @@
 package org.genmapp.expressionreader.geo;
 
-import java.awt.Container;
-import java.awt.Frame;
 import org.genmapp.expressionreader.geo.data.SOFT;
 import org.genmapp.expressionreader.geo.parser.SOFTParser;
 import java.io.BufferedInputStream;
@@ -21,14 +19,9 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
-import javax.swing.JDialog;
 import javax.swing.JOptionPane;
-import javax.swing.JTabbedPane;
-import javax.swing.WindowConstants;
 import org.genmapp.expressionreader.geo.data.GDS;
 import org.genmapp.expressionreader.geo.data.GSE;
-import org.genmapp.expressionreader.geo.ui.SOFTViewer;
-import org.genmapp.expressionreader.geo.ui.SOFTViewerPane;
 
 /**
  *
@@ -60,7 +53,7 @@ public class GEOQuery {
             }
             dest.flush();
         } catch (IOException ex) {
-            ex.printStackTrace();
+            Logger.getLogger(GEOQuery.class.getName()).log(Level.SEVERE, null, ex);
             return false;
         } finally {
             if (bis != null) {
@@ -154,7 +147,8 @@ public class GEOQuery {
                     }
                 }
             } catch (Exception e) {
-                JOptionPane.showMessageDialog(null, "Error attempting to launch web browser" + "\n" + e.toString());
+                String msg = "Error attempting to launch web browser" + "\n" + e.toString();
+                Logger.getLogger(GEOQuery.class.getName()).log(Level.SEVERE, msg, e);
             }
         }
     }
@@ -203,7 +197,7 @@ public class GEOQuery {
         else if (geoId.startsWith("GDS"))
             return SOFT.Type.GDS;
         else
-            throw new UnsupportedOperationException("geo type is not supported");
+            throw new UnsupportedOperationException("Can't associate any type to GEOID " + geoId);
 
     }
 
@@ -232,6 +226,7 @@ public class GEOQuery {
                 }
             }
         }
+        soft.setType(SOFT.Type.GDS);
         return soft;
     }
 
@@ -262,6 +257,7 @@ public class GEOQuery {
                 }
             }
         }
+        soft.setType(SOFT.Type.GSE);
         return soft;
     }
 
@@ -300,6 +296,7 @@ public class GEOQuery {
                     }
                 }
             }
+            soft.setType(type);
             return soft;
         }
     }

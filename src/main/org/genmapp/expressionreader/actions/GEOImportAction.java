@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.JOptionPane;
 
 import cytoscape.Cytoscape;
+import cytoscape.logger.CyLogger;
 import cytoscape.task.ui.JTaskConfig;
 import cytoscape.task.util.TaskManager;
 import cytoscape.util.CytoscapeAction;
@@ -18,10 +19,13 @@ import org.genmapp.expressionreader.geo.ui.GEOQueryUI;
 import org.genmapp.expressionreader.geo.ui.GSEViewerDialog;
 import org.genmapp.expressionreader.ui.GSMImportDialog;
 import org.genmapp.expressionreader.geo.ui.SOFTViewer;
+import org.genmapp.expressionreader.tasks.GSMImportTask;
 
 public class GEOImportAction extends CytoscapeAction implements SOFTViewer {
 
     private static final long serialVersionUID = 1128930960050800232L;
+
+    static public CyLogger logger = CyLogger.getLogger(GEOImportAction.class);
 
     public GEOImportAction() {
         super("Import");
@@ -47,8 +51,12 @@ public class GEOImportAction extends CytoscapeAction implements SOFTViewer {
     }
 
     public void viewSOFT(List<SOFT> list) { // should expect only one back
+        logger.debug("View SOFT: " + list.size());
+
         SOFT soft = list.get(0);
-        if (soft.getType() == SOFT.Type.GSM) {
+        if (soft.getType() == SOFT.Type.GSM) { // If GSM, import it
+            //GSMImportTask task = new GSMImportTask(preferredMenu, list, list, keyCode, keyCode, preferredMenu, consoleName, DEFAULT);
+            
             GSMImportDialog dialog = new GSMImportDialog(Cytoscape.getDesktop(), false);
             dialog.setSOFTList(list);
             dialog.setVisible(true);
@@ -69,6 +77,4 @@ public class GEOImportAction extends CytoscapeAction implements SOFTViewer {
     public void closeView(SOFT soft) {
         // not implemented
     }
-
-
 }

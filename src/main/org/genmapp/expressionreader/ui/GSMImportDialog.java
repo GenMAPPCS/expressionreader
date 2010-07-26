@@ -1,32 +1,25 @@
 package org.genmapp.expressionreader.ui;
 
 import org.genmapp.expressionreader.geo.ui.SOFTViewer;
-import cytoscape.CyNetwork;
-import cytoscape.CyNode;
-import cytoscape.Cytoscape;
 import cytoscape.cythesaurus.CyThesaurusServiceClient;
 import cytoscape.cythesaurus.CyThesaurusServiceMessageBasedClient;
-import cytoscape.data.CyAttributes;
 import cytoscape.task.ui.JTaskConfig;
 import cytoscape.task.util.TaskManager;
-import org.genmapp.expressionreader.geo.data.DataTable;
 import org.genmapp.expressionreader.geo.data.SOFT;
 import org.genmapp.expressionreader.tasks.AbstractTask;
 import org.genmapp.expressionreader.tasks.SOFTDownloadTask;
-import java.util.ArrayList;
+import java.util.ArrayList ;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
 import org.genmapp.expressionreader.geo.GEOQuery;
 import org.genmapp.expressionreader.geo.ui.GEOQueryUI;
+import org.genmapp.expressionreader.tasks.GSMImportTask;
 
 /**
  *
@@ -37,7 +30,7 @@ public class GSMImportDialog extends javax.swing.JDialog implements SOFTViewer {
     private List<SOFT> softList;
     private List<SOFT> gplList = new ArrayList<SOFT>();
     private CyThesaurusServiceClient client = new CyThesaurusServiceMessageBasedClient();
-
+    
     /** Creates new form SOFTImportDialog */
     public GSMImportDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
@@ -314,134 +307,18 @@ public class GSMImportDialog extends javax.swing.JDialog implements SOFTViewer {
     }//GEN-LAST:event_useIdMappingNoRadioBtnActionPerformed
 
     private void importButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importButtonActionPerformed
-        final CyAttributes cyattrs = Cytoscape.getNodeAttributes();
-        final CyNetwork network = Cytoscape.getCurrentNetwork();
-        final List<CyNode> nodes = (List<CyNode>) network.nodesList();
+        String networkKeyAttr = (String) sourceKeyAttrCombo.getSelectedItem();
 
-        JTaskConfig config = new JTaskConfig();
-        config.setAutoDispose(false);
-        config.setModal(false);
-        config.displayStatus(true);
-        config.displayCancelButton(true);
-        config.displayCloseButton(true);
-        config.setOwner(Cytoscape.getDesktop());
+        int tgtValueIndex = targetValueAttrCombo.getSelectedIndex();
+        String tgtValueAttr = (String) targetValueAttrCombo.getSelectedItem();
+        final int tgtKeyIndex = targetKeyAttrCombo.getSelectedIndex();
+        String srcIDType = (String) sourceIdTypeCombo.getSelectedItem();
+        String tgtIDType = (String) targetIdTypeCombo.getSelectedItem();
 
-        //this.setVisible(false);
-        boolean result = TaskManager.executeTask(new AbstractTask() {
-
-            public void run() {
-                if (taskMonitor != null) {
-                    taskMonitor.setStatus("Preparing for importing Data into Network " + network.getTitle());
-                }
-                String srcKeyAttr = (String) sourceKeyAttrCombo.getSelectedItem();
-                int tgtValueIndex = targetValueAttrCombo.getSelectedIndex();
-                String tgtValueAttr = (String) targetValueAttrCombo.getSelectedItem();
-
-                final int tgtKeyIndex = targetKeyAttrCombo.getSelectedIndex();
-
-                for (SOFT soft : softList) {
-                    DataTable dt = soft.getDataTables().getFirst();
-
-                    List<String> dataKeys = new ArrayList<String>(dt.getData().keySet());
-                    List<Object> merged = new ArrayList<Object>();
-                    for (String key : dataKeys) {
-                        List<String> list = new ArrayList<String>();
-                        list.addAll(dt.getData().get(key));
-                        if (gplList != null) {
-                            for (SOFT gpl : gplList) {
-                                list.addAll(gpl.getDataTables().getFirst().getData().get(key));
-                            }
-                        }
-                        merged.add(list);
-                    }
-
-                    List<String> mapFrom = new ArrayList<String>();
-                    for (CyNode node : nodes) {
-                        if ("ID".equals(srcKeyAttr)) {
-                            mapFrom.add(node.getIdentifier());
-                        } else {
-                            mapFrom.add((String) cyattrs.getAttribute(node.getIdentifier(), srcKeyAttr));
-                        }
-                    }
-
-                    Collections.sort(merged, new Comparator<Object>() {
-
-                        public int compare(Object t, Object t1) {
-                            String s = (String) ((List) t).get(tgtKeyIndex);
-                            String s1 = (String) ((List) t1).get(tgtKeyIndex);
-                            return s.compareTo(s1);
-                        }
-                    });
-
-                    Comparator comparator = new Comparator() {
-
-                        public int compare(Object t, Object t1) {
-                            String s = (String) ((List) t).get(tgtKeyIndex);
-                            String s1 = (String) t1;
-                            return s.compareTo(s1);
-                        }
-                    };
-                    Map mapTypeAttr = null;
-                    if (idMapConfigBtn.isEnabled()) { // use id mappings
-
-                        if (taskMonitor != null) {
-                            taskMonitor.setStatus("Mapping IDs");
-                        }
-                        String srcIDType = (String) sourceIdTypeCombo.getSelectedItem();
-                        String tgtIDType = (String) targetIdTypeCombo.getSelectedItem();
-
-                        Set<String> srcIDs = new HashSet<String>();
-                        srcIDs.addAll(mapFrom);
-                        mapTypeAttr = client.mapID(srcIDs, srcIDType, tgtIDType);
-                    }
-
-                    if (taskMonitor != null) {
-                        taskMonitor.setStatus("Importing Data into Network");
-                    }
-                    int totalAdded = 0;
-                    String nameAttr = getAttrName(cyattrs, nodes.get(0), tgtValueAttr, soft);
-                    // find all occurances and add to nodes
-                    for (int i = 0; i < nodes.size(); i++) {
-                        String srcKeyVal = mapFrom.get(i);
-                        CyNode node = nodes.get(i);
-
-                        if (idMapConfigBtn.isEnabled()) {
-                            Set<String> values = (Set<String>) mapTypeAttr.get(srcKeyVal);
-
-                            if (values != null && !values.isEmpty()) {
-                                Iterator<String> it = values.iterator();
-                                while (it.hasNext()) {
-                                    String next = it.next();
-                                    int index = Collections.binarySearch(merged, next, comparator);
-                                    if (index >= 0) {
-                                        List list = (List) merged.get(index);
-                                        cyattrs.setAttribute(node.getIdentifier(), nameAttr,
-                                                (String) list.get(tgtValueIndex));
-                                        totalAdded++;
-                                        break;
-                                    }
-                                }
-                            }
-                        } else {
-                            int index = Collections.binarySearch(merged, srcKeyVal, comparator);
-                            if (index >= 0) {
-                                List list = (List) merged.get(index);
-                                cyattrs.setAttribute(node.getIdentifier(), nameAttr,
-                                        (String) list.get(tgtValueIndex));
-                                totalAdded++;
-                            }
-                        }
-                    }
-                }
-                if (taskMonitor != null) {
-                    taskMonitor.setStatus(String.format("Importing complete"));
-                }
-            }
-
-            public String getTitle() {
-                return "Importing data into Network";
-            }
-        }, config);
+        GSMImportTask task = new GSMImportTask(networkKeyAttr, softList, gplList, tgtKeyIndex, tgtValueIndex, tgtValueAttr, srcIDType, tgtIDType);
+        task.setClient(client);
+        task.setUseIdMapping(this.idMapConfigBtn.isEnabled());
+        boolean result = TaskManager.executeTask(task, task.getDefaultTaskConfig());
         if (result) {
             this.dispose();
         } else {
@@ -604,18 +481,6 @@ public class GSMImportDialog extends javax.swing.JDialog implements SOFTViewer {
                 return "Initializing CyThesaurus ID Mapping Services";
             }
         }, config);
-    }
-
-    private String getAttrName(CyAttributes attrs, CyNode node, String tgtValueAttr, SOFT soft) {
-        String name = String.format("%s[%s]", soft.getId(), tgtValueAttr);
-        if (attrs.hasAttribute(node.getIdentifier(), name)) {
-            int i = 1;
-            do {
-                name = String.format("%s[%s-%d]", soft.getId(), tgtValueAttr, i);
-                i = i+1;
-            } while (attrs.hasAttribute(node.getIdentifier(), name));
-        }
-        return name;
     }
 
     public void viewSOFT(List<SOFT> list) {
