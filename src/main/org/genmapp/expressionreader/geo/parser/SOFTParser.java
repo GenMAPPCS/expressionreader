@@ -28,6 +28,7 @@ public class SOFTParser {
     public static final String PLATFORM = "PLATFORM";
     private static final String ID_PATTERN = "\\^(.*)\\s=\\s(.*)";
     private static final String FIELD_PATTERN = "\\!(.*)\\s=\\s(.*)";
+    private static final String BLANK_FIELD_PATTERN = "\\!(.*)\\s=\\s*";
     private static final String TABLE_HEADER_PATTERN = "\\#(.*)\\s=\\s(.*)";
     private static final String TABLE_PATTERN = "\\!(.*)_table_begin(\\s=\\s(.*))?";
     private String currentId = null;
@@ -38,6 +39,7 @@ public class SOFTParser {
         SOFT soft = new SOFT(currentId);
         soft.setTypeStr(currentType);
         Pattern fieldPattern = Pattern.compile(FIELD_PATTERN);
+        Pattern blankFieldPattern = Pattern.compile(BLANK_FIELD_PATTERN);
         Pattern tableheaderPattern = Pattern.compile(TABLE_HEADER_PATTERN);
         Pattern idPattern = Pattern.compile(ID_PATTERN);
         Pattern tablePattern = Pattern.compile(TABLE_PATTERN);
@@ -54,6 +56,12 @@ public class SOFTParser {
 
         int start = lineNumber;
         while ((line = in.readLine()) != null) {
+            if ("".equals(line.trim())) {
+                // Some files have two types of line terminators (\r\n and \n)
+                // This becomes a problem in parsing.
+                // See: http://socrates2.cgl.ucsf.edu/GenMAPP/ticket/24
+                continue;
+            }
             lineNumber++;
             Matcher m = idPattern.matcher(line); // end parsing this section
             if (m.matches()) {
@@ -115,6 +123,14 @@ public class SOFTParser {
                 }
                 continue;
             }
+
+            m = blankFieldPattern.matcher(line);
+            if (m.matches()) {  // this is a blank field. just skip it.
+                System.out.println("Blank line: " + line);
+                continue;
+            }
+
+            System.out.println("Why I;m still here?");
             throw new ParseException("Failed to parse line (" + lineNumber + "): " + line, lineNumber);
         }
 

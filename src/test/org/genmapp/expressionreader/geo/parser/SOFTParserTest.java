@@ -1,5 +1,7 @@
 package org.genmapp.expressionreader.geo.parser;
 
+import java.io.File;
+import java.io.FileInputStream;
 import static org.junit.Assert.assertEquals;
 import org.genmapp.expressionreader.geo.data.SOFT;
 
@@ -145,6 +147,17 @@ public class SOFTParserTest {
         }
 
         // Show the list of fields to let people to map to column
+        assertEquals(1, soft.getDataTables().size());
+    }
+
+    @Test
+    public void testParserGSM2() throws Exception {
+        File file = new File(root, "data/GSM1351-full.txt");
+        FileInputStream in = new FileInputStream(file);
+        SOFT soft = new SOFTParser().parse(in, SOFT.Type.GSM);
+        if (in != null) {
+            in.close();
+        }
         assertEquals(1, soft.getDataTables().size());
     }
 }
