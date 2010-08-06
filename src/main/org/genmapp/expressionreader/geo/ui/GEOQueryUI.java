@@ -7,7 +7,11 @@ package org.genmapp.expressionreader.geo.ui;
 
 import java.awt.Container;
 import java.awt.Frame;
+import java.awt.event.WindowEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.List;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JTabbedPane;
 import javax.swing.WindowConstants;
@@ -33,14 +37,16 @@ public class GEOQueryUI {
         pane.setSoft(soft);
         dialog.setContentPane(pane);
 
-        pane.setOwner(new SOFTViewer() {
+        pane.addPropertyChangeListener(new PropertyChangeListener() {
 
-            public void viewSOFT(List<SOFT> soft) {
-                throw new UnsupportedOperationException("Not supported yet.");
-            }
-
-            public void closeView(SOFT soft) {
-                fdialog.dispose();
+            public void propertyChange(PropertyChangeEvent pce) {
+                    if (pce.getPropertyName().equals("SOFTViewer_ViewStatus")) {
+                        if (pce.getNewValue() instanceof Integer) {
+                            if ((Integer)pce.getNewValue() == WindowEvent.WINDOW_CLOSING) {
+                                fdialog.dispose();
+                            }
+                        }
+                    }
             }
         });
 
@@ -69,19 +75,22 @@ public class GEOQueryUI {
             SOFTViewerPane pane = new SOFTViewerPane();
             pane.setSoft(soft);
             tabs.add(soft.getId(), pane);
-            pane.setOwner(new SOFTViewer() {
 
-                public void viewSOFT(List<SOFT> soft) {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
+            pane.addPropertyChangeListener(new PropertyChangeListener() {
 
-                public void closeView(SOFT soft) {
-                    tabs.removeTabAt(tabs.indexOfTab(soft.getId()));
-                    if (tabs.getTabCount() == 0) {
-                        fdialog.dispose();
+                public void propertyChange(PropertyChangeEvent pce) {
+                    if (pce.getPropertyName().equals("SOFTViewer_ViewStatus")) {
+                        if (pce.getNewValue() instanceof Integer) {
+                            if ((Integer)pce.getNewValue() == WindowEvent.WINDOW_CLOSING) {
+                                tabs.remove((JComponent)pce.getSource());
+                                if (tabs.getTabCount() == 0) {
+                                    fdialog.dispose();
+                                }
+                            }
+                        }
                     }
                 }
-            });
+            });            
         }
 
         dialog.setSize(600, 760);

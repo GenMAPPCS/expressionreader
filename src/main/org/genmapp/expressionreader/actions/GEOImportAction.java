@@ -19,7 +19,6 @@ import org.genmapp.expressionreader.geo.ui.GEOQueryUI;
 import org.genmapp.expressionreader.geo.ui.GSEViewerDialog;
 import org.genmapp.expressionreader.ui.GSMImportDialog;
 import org.genmapp.expressionreader.geo.ui.SOFTViewer;
-import org.genmapp.expressionreader.tasks.GSMImportTask;
 
 public class GEOImportAction extends CytoscapeAction implements SOFTViewer {
 

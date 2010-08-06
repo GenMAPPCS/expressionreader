@@ -14,20 +14,39 @@ package org.genmapp.expressionreader.geo.ui;
 import cytoscape.Cytoscape;
 import cytoscape.task.ui.JTaskConfig;
 import cytoscape.task.util.TaskManager;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.event.WindowEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.genmapp.expressionreader.geo.data.SOFT;
 import org.genmapp.expressionreader.geo.GEOQuery;
 import org.genmapp.expressionreader.tasks.SOFTDownloadTask;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import javax.swing.AbstractListModel;
+import javax.swing.DefaultListModel;
+import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.TransferHandler;
 import javax.swing.border.TitledBorder;
+import javax.swing.plaf.basic.BasicComboBoxUI.PropertyChangeHandler;
 import javax.swing.table.AbstractTableModel;
 import org.genmapp.expressionreader.geo.data.DataTable;
 import org.genmapp.expressionreader.geo.data.GSE;
 import org.genmapp.expressionreader.ui.GSMImportDialog;
+import org.genmapp.expressionreader.ui.GroupPane;
 
 /**
  *
@@ -35,10 +54,14 @@ import org.genmapp.expressionreader.ui.GSMImportDialog;
  */
 public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
     private SOFT soft;
+    private Map<String, List<SOFT>> groupMap;
+
     /** Creates new form GSMViewerDialog */
     public GSEViewerDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        initDnD();
+        groupMap = new LinkedHashMap<String, List<SOFT>>();
     }
 
     public void setSOFT(SOFT soft) {
@@ -51,10 +74,11 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
 
             @Override
             public String getColumnName(int i) {
-                if (i == 0) {
-                    return "ID";
-                } else {
-                    return "Title";
+                switch (i) {
+                    case 0: return "ID";
+                    case 1: return "Title";
+                    case 2: return "Source";
+                    default: return "";
                 }
             }
 
@@ -63,15 +87,17 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
             }
 
             public int getColumnCount() {
-                return 2;
+                return 3;
             }
 
             public Object getValueAt(int i, int i1) {
                 SOFT sample = samples.get(i);
                 if (i1 == 0) {
                     return sample.getId();
-                } else {
+                } else if (i1 == 1) {
                     return sample.getFields().get("Sample_title");
+                } else {
+                    return sample.getFields().get("Sample_source_name_ch1");
                 }
             }
         });
@@ -106,19 +132,6 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
                 }
             }
         });
-
-        if (gse.getDataTables().size() > 0) { // has gruops
-            groupList.setModel(new AbstractListModel() {
-
-                public int getSize() {
-                    return gse.getDataTables().size();
-                }
-
-                public Object getElementAt(int i) {
-                    return gse.getDataTables().get(i).getTitle();
-                }
-            });
-        }
 
         metadataTable.setModel(new AbstractTableModel() {
 
@@ -156,6 +169,27 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
         });
 
         nameLbl.setText(org.genmapp.expressionreader.geo.GEOQuery.getSoftNameLblText(soft));
+
+        Set<String> sources = new HashSet<String>();
+        for (SOFT sample: gse.getSamples()) {
+            String source = (String)sample.getFields().get("Sample_source_name_ch1");
+            List<SOFT> list = groupMap.get(source);
+            if (list == null) {
+                list = new ArrayList<SOFT>();
+            }
+            list.add(sample);
+            groupMap.put(source, list);
+        }
+        groupList.setModel(new AbstractListModel() {
+
+            public int getSize() {
+                return groupMap.keySet().size();
+            }
+
+            public Object getElementAt(int i) {
+                return new ArrayList(groupMap.keySet()).get(i);
+            }
+        });
     }
 
     /** This method is called from within the constructor to
@@ -186,8 +220,10 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
         platformTable = new javax.swing.JTable();
         groupsPane = new javax.swing.JPanel();
         jPanel1 = new javax.swing.JPanel();
+        addGroupBtn = new javax.swing.JButton();
+        removeGroupBtn = new javax.swing.JButton();
+        renameGroupBtn = new javax.swing.JButton();
         viewGroupBtn = new javax.swing.JButton();
-        importGroupBtn = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         groupList = new javax.swing.JList();
         gsmInfoPane = new javax.swing.JPanel();
@@ -233,6 +269,7 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
 
         samplePane.add(sampleButtonPane, java.awt.BorderLayout.PAGE_END);
 
+        sampleTable.setDragEnabled(true);
         sampleTable.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 sampleTableMouseClicked(evt);
@@ -269,6 +306,30 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
 
         groupsPane.setLayout(new java.awt.BorderLayout());
 
+        addGroupBtn.setText("  Add  ");
+        addGroupBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addGroupBtnActionPerformed(evt);
+            }
+        });
+        jPanel1.add(addGroupBtn);
+
+        removeGroupBtn.setText("Remove");
+        removeGroupBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                removeGroupBtnActionPerformed(evt);
+            }
+        });
+        jPanel1.add(removeGroupBtn);
+
+        renameGroupBtn.setText("Rename");
+        renameGroupBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                renameGroupBtnActionPerformed(evt);
+            }
+        });
+        jPanel1.add(renameGroupBtn);
+
         viewGroupBtn.setText("  View  ");
         viewGroupBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -276,15 +337,6 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
             }
         });
         jPanel1.add(viewGroupBtn);
-
-        importGroupBtn.setText(" Import ");
-        importGroupBtn.setEnabled(false);
-        importGroupBtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                importGroupBtnActionPerformed(evt);
-            }
-        });
-        jPanel1.add(importGroupBtn);
 
         groupsPane.add(jPanel1, java.awt.BorderLayout.PAGE_END);
 
@@ -409,43 +461,35 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
     private void viewGroupBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewGroupBtnActionPerformed
         final int index = groupList.getSelectedIndex();
         if (index < 0) return;
-        final DataTable dt = soft.getDataTables().get(index);
-        String id = soft.getDataTables().get(index).getTitle();
-        if ( sampleTabbedPane.indexOfTab(id) < 0) {
-            JTable table = new JTable();
-            table.setModel(new AbstractTableModel() {
+        Object[] keys = groupList.getSelectedValues();
 
+        for (Object key: keys) {
+            int tabIndex = sampleTabbedPane.indexOfTab((String)key);
+            if (tabIndex >= 0) {
+                sampleTabbedPane.setSelectedIndex(index);
+            } else {
+                List<SOFT> softList = groupMap.get((String)key);
 
-                List<String> keys = new ArrayList<String>(dt.getData().keySet());
-                public int getRowCount() {
-                    return dt.getData().size();
-                }
+                GroupPane groupPane = new GroupPane();
+                groupPane.addPropertyChangeListener(new PropertyChangeListener() {
 
-                public int getColumnCount() {
-                    return dt.getHeaders().size();
-                }
-
-                public Object getValueAt(int i, int i1) {
-                    return dt.getData().get(keys.get(i)).get(i1);
-                }
-
-                @Override
-                public String getColumnName(int i) {
-                    return (String) new ArrayList(dt.getHeaders().keySet()).get(i);
-                }
-            });
-            JScrollPane pane = new JScrollPane(table);
-            pane.setBorder(new TitledBorder("Total Records Unknown. Showing only top " + dt.getData().size()));
-            sampleTabbedPane.add(id, pane);
-            sampleTabbedPane.setSelectedComponent(pane);
-        } else {
-            sampleTabbedPane.setSelectedIndex(sampleTabbedPane.indexOfTab(id));
+                    public void propertyChange(PropertyChangeEvent pce) {
+                        if (pce.getPropertyName().equals("GroupPane_ViewStatus")) {
+                            if (pce.getNewValue() instanceof Integer) {
+                                if ((Integer)pce.getNewValue() == WindowEvent.WINDOW_CLOSING) {
+                                    GroupPane pane = (GroupPane) pce.getSource();
+                                    sampleTabbedPane.remove(pane);
+                                }
+                            }
+                        }
+                    }
+                });
+                groupPane.setSamples(softList);
+                sampleTabbedPane.add((String)key, groupPane);
+                sampleTabbedPane.setSelectedComponent(groupPane);
+            }
         }
     }//GEN-LAST:event_viewGroupBtnActionPerformed
-
-    private void importGroupBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importGroupBtnActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_importGroupBtnActionPerformed
 
     private void sampleTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_sampleTableMouseClicked
         if (evt.getClickCount() == 2) {
@@ -464,6 +508,88 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
             viewGroupBtnActionPerformed(null);
         }
     }//GEN-LAST:event_groupListMouseClicked
+
+    private void addGroupBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addGroupBtnActionPerformed
+        String response = (String) JOptionPane.showInputDialog(this,
+                "Please enter name for the new group", "Add Group",
+                JOptionPane.PLAIN_MESSAGE, null, null, "");
+        if (response != null && !"".equals(response)) {
+            groupMap.put(response, new ArrayList<SOFT>());
+            groupList.updateUI();
+        }
+    }//GEN-LAST:event_addGroupBtnActionPerformed
+
+    private void removeGroupBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeGroupBtnActionPerformed
+        Object[] values = groupList.getSelectedValues();
+        StringBuilder sb = new StringBuilder();
+        for (Object v: values) {
+            sb.append(v);
+            sb.append(";");
+        }
+        int response = JOptionPane.showConfirmDialog(this,
+                "Are you sure to remove these groups? " + sb, "Remove groups", JOptionPane.YES_NO_OPTION);
+        if (response == JOptionPane.YES_OPTION) {
+            for (Object v: values) {
+                groupMap.remove((String)v);
+                int index = sampleTabbedPane.indexOfTab((String)v);
+                if (index >= 0) sampleTabbedPane.remove(index);
+            }
+            groupList.updateUI();
+        }            
+    }//GEN-LAST:event_removeGroupBtnActionPerformed
+
+    private void renameGroupBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_renameGroupBtnActionPerformed
+        int row = groupList.getSelectedIndex();
+        String value = (String)groupList.getSelectedValue();
+        String response = (String) JOptionPane.showInputDialog(this,
+                "Please enter new name for the group", "Rename Group",
+                JOptionPane.PLAIN_MESSAGE, null, null, value);
+        if (response != null && !"".equals(response)) {
+            if (groupMap.containsKey(response)) {
+                int merge = JOptionPane.showConfirmDialog(this,
+                        "The new group name you entered " + response +
+                        " has already exists. Shall I merge the two groups? No will cancel this operation",
+                        "Name Already Exists!", JOptionPane.YES_NO_OPTION);
+                if (merge == JOptionPane.YES_OPTION) {
+                    List<SOFT> list = groupMap.remove(value);
+                    int index = sampleTabbedPane.indexOfTab(value);
+                    if (index >= 0) {
+                        sampleTabbedPane.remove(index);
+                    }
+
+                    // Now merge to the existing one
+                    List<SOFT> merged = groupMap.get(response);
+                    index = sampleTabbedPane.indexOfTab(response);
+                    GroupPane pane = null;
+                    if (index >= 0) {
+                        pane = (GroupPane)sampleTabbedPane.getComponentAt(index);
+                    }
+
+                    for (SOFT s: list) {
+                        if (!merged.contains(s)) {
+                            merged.add(s);
+                        }
+                    }
+
+                    if (pane != null) {
+                        pane.updateSampleTable();
+                        sampleTabbedPane.setSelectedComponent(pane);
+                    }
+                    groupMap.put(response, merged);
+                    groupList.updateUI();
+                }
+            } else {
+                List<SOFT> list = groupMap.remove(value);
+                groupMap.put(response, list);
+                groupList.updateUI();
+
+                int index = sampleTabbedPane.indexOfTab(value);
+                if (index >= 0) {
+                    sampleTabbedPane.setTitleAt(index, response);
+                }
+            }
+        }
+    }//GEN-LAST:event_renameGroupBtnActionPerformed
 
     /**
     * @param args the command line arguments
@@ -492,13 +618,13 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton addGroupBtn;
     private javax.swing.JButton addToGruopBtn;
     private javax.swing.JSplitPane contentSplitPane;
     private javax.swing.JList groupList;
     private javax.swing.JPanel groupsPane;
     private javax.swing.JTabbedPane gsmContentTabbedPane;
     private javax.swing.JPanel gsmInfoPane;
-    private javax.swing.JButton importGroupBtn;
     private javax.swing.JButton importSampleBtn;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
@@ -513,6 +639,8 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
     private javax.swing.JPanel platformButtonPane;
     private javax.swing.JPanel platformPane;
     private javax.swing.JTable platformTable;
+    private javax.swing.JButton removeGroupBtn;
+    private javax.swing.JButton renameGroupBtn;
     private javax.swing.JPanel sampleButtonPane;
     private javax.swing.JPanel samplePane;
     private javax.swing.JTabbedPane sampleTabbedPane;
@@ -536,11 +664,62 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
                 sampleTabbedPane.setSelectedIndex(index);
             } else {
                 SOFTViewerPane pane = new SOFTViewerPane();
-                pane.setOwner(this);
+                pane.addPropertyChangeListener(new PropertyChangeListener() {
+
+                    public void propertyChange(PropertyChangeEvent pce) {
+                        if (pce.getPropertyName().equals("SOFTViewer_ViewStatus")) {
+                            if (pce.getNewValue() instanceof Integer) {
+                                if ((Integer)pce.getNewValue() == WindowEvent.WINDOW_CLOSING) {
+                                    sampleTabbedPane.remove((JComponent)pce.getSource());
+                                }
+                            }
+                        }
+                    }
+                });
                 pane.setSoft(soft);
                 sampleTabbedPane.add(soft.getId(), pane);
                 sampleTabbedPane.setSelectedComponent(pane);
             }
         }
+    }
+
+    /**
+     * Initialize Drag and Drop
+     */
+    private void initDnD() {
+        sampleTable.setTransferHandler(new TransferHandler() {
+
+            @Override
+            public int getSourceActions(JComponent c) {
+                return COPY_OR_MOVE;
+            }
+
+            @Override
+            public Transferable createTransferable(final JComponent c) {
+                final GSE gse = (GSE)soft;
+                return new Transferable() {
+
+                    public DataFlavor[] getTransferDataFlavors() {
+                        return new DataFlavor[]{new DataFlavor(DataFlavor.javaJVMLocalObjectMimeType, "SOFT")};
+                    }
+
+                    public boolean isDataFlavorSupported(DataFlavor flavor) {
+                        return true;
+                    }
+
+                    public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
+                        JTable table = (JTable)c;
+                        List<SOFT> samples = gse.getSamples();
+                        List<SOFT> list = new ArrayList<SOFT>();
+                        int[] rows = table.getSelectedRows();
+                        for (int row: rows) {
+                            list.add(samples.get(row));
+                        }
+                        return list;
+                    }
+
+                };
+            }
+        });
     }
 }

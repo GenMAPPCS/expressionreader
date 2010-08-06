@@ -11,6 +11,9 @@
 
 package org.genmapp.expressionreader.geo.ui;
 
+import java.awt.event.WindowEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.List;
 import org.genmapp.expressionreader.geo.GEOQuery;
 import org.genmapp.expressionreader.geo.data.GDS;
@@ -85,7 +88,18 @@ public class GDSViewerDialog extends javax.swing.JDialog implements SOFTViewer {
     public void setSOFT(SOFT soft) {
         if (soft.getType() == SOFT.Type.GDS) {
             this.gds = (GDS)soft;
-            this.softViewerPane.setOwner(this);
+            this.softViewerPane.addPropertyChangeListener(new PropertyChangeListener() {
+
+                public void propertyChange(PropertyChangeEvent pce) {
+                    if (pce.getPropertyName().equals("SOFTViewer_ViewStatus")) {
+                        if (pce.getNewValue() instanceof Integer) {
+                            if ((Integer) pce.getNewValue() == WindowEvent.WINDOW_CLOSING) {
+                                dispose();
+                            }
+                        }
+                    }
+                }
+            });
             this.softViewerPane.setSoft(soft);
 
             this.setTitle(soft.getId());
@@ -103,9 +117,5 @@ public class GDSViewerDialog extends javax.swing.JDialog implements SOFTViewer {
 
     public void viewSOFT(List<SOFT> soft) {
         throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void closeView(SOFT soft) {
-        this.dispose();
     }
 }

@@ -2,13 +2,19 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package org.genmapp.expressionreader.actions;
 
 import cytoscape.Cytoscape;
 import cytoscape.util.CytoscapeAction;
 import java.awt.event.ActionEvent;
-import org.genmapp.expressionreader.ui.GEOSearchDialog;
+import java.util.List;
+import javax.swing.JDialog;
+import org.genmapp.expressionreader.geo.data.SOFT;
+import org.genmapp.expressionreader.geo.ui.GDSViewerDialog;
+import org.genmapp.expressionreader.geo.ui.GEOQueryUI;
+import org.genmapp.expressionreader.geo.ui.GSEViewerDialog;
+import org.genmapp.expressionreader.geo.ui.SOFTViewer;
+import org.genmapp.expressionreader.ui.GEOSearchPane;
 
 /**
  *
@@ -22,8 +28,34 @@ public class GEOSearchAction extends CytoscapeAction {
 
     @Override
     public void actionPerformed(ActionEvent ae) {
-        GEOSearchDialog dialog = new GEOSearchDialog(Cytoscape.getDesktop(), false);
+        JDialog dialog = new JDialog(Cytoscape.getDesktop(), false);
         dialog.setSize(800, 500);
+        SOFTViewer viewer = new SOFTViewer() {
+
+            public void viewSOFT(List<SOFT> list) {
+                for (SOFT soft : list) {
+                    if (soft.getType() == SOFT.Type.GSE) {
+                        GSEViewerDialog dialog = new GSEViewerDialog(Cytoscape.getDesktop(), false);
+                        dialog.setSOFT(soft);
+                        dialog.setSize(600, 500);
+                        dialog.setVisible(true);
+                    } else if (soft.getType() == SOFT.Type.GDS) {
+                        GDSViewerDialog dialog = new GDSViewerDialog(Cytoscape.getDesktop(), false);
+                        dialog.setSOFT(soft);
+                        dialog.setVisible(true);
+                    } else if (soft.getType() == SOFT.Type.GPL) {
+                        GEOQueryUI.showSOFTViewerDialog(Cytoscape.getDesktop(), false, soft);
+                    } else {
+                        throw new UnsupportedOperationException("Wrong SOFT type: " + soft.getType() + ", Should be GSE/GDS/GPL");
+                    }
+                }
+            }
+
+            public void closeView(SOFT soft) {
+                // not implemented
+            }
+        };
+        dialog.setContentPane(new GEOSearchPane(viewer));
         dialog.setVisible(true);
     }
 }

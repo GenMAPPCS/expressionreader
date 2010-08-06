@@ -14,5 +14,5 @@ import org.genmapp.expressionreader.geo.data.SOFT;
  */
 public interface SOFTViewer {
     public void viewSOFT(List<SOFT> soft);
-    public void closeView(SOFT soft);
+//    public void closeView(SOFT soft);
 }

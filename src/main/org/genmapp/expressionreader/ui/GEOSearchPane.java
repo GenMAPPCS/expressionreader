@@ -11,8 +11,6 @@
 
 package org.genmapp.expressionreader.ui;
 
-import org.genmapp.expressionreader.geo.ui.GDSViewerDialog;
-import org.genmapp.expressionreader.geo.ui.GSEViewerDialog;
 import org.genmapp.expressionreader.geo.ui.SOFTViewer;
 import cytoscape.Cytoscape;
 import cytoscape.task.Task;
@@ -21,13 +19,11 @@ import cytoscape.task.util.TaskManager;
 import gov.nih.nlm.ncbi.soap.eutils.esearch.ESearchRequest;
 import gov.nih.nlm.ncbi.soap.eutils.esummary.DocSumType;
 import gov.nih.nlm.ncbi.soap.eutils.esummary.ItemType;
-import java.awt.Dimension;
 import java.util.List;
+import javax.swing.JDialog;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
-import org.genmapp.expressionreader.geo.GEOQuery;
 import org.genmapp.expressionreader.geo.data.SOFT;
-import org.genmapp.expressionreader.geo.ui.GEOQueryUI;
 import org.genmapp.expressionreader.tasks.GEOSearchTask;
 import org.genmapp.expressionreader.tasks.SOFTDownloadTask;
 import org.genmapp.expressionreader.tasks.SearchResultViewer;
@@ -36,16 +32,17 @@ import org.genmapp.expressionreader.tasks.SearchResultViewer;
  *
  * @author djiao
  */
-public class GEOSearchDialog extends javax.swing.JDialog implements SearchResultViewer {
+public class GEOSearchPane extends javax.swing.JPanel implements SearchResultViewer {
 
     private int page = 0;
     private int itemPerPage = 20;
-    private int total = 0;
     private String term = "";
 
+    private SOFTViewer softViewer = null;
+
     /** Creates new form GEOSearchDialog */
-    public GEOSearchDialog(java.awt.Frame parent, boolean modal) {
-        super(parent, modal);
+    public GEOSearchPane() {
+        super();
         initComponents();
 
         double[] percent = new double[] {0.1, 0.2, 0.25, 0.2, 0.1, 0.2};
@@ -55,6 +52,15 @@ public class GEOSearchDialog extends javax.swing.JDialog implements SearchResult
             column.setResizable(true);
         } 
 
+    }
+
+    public GEOSearchPane(SOFTViewer viewer) {
+        this();
+        this.softViewer = viewer;
+    }
+
+    public void setSoftViewer(SOFTViewer viewer) {
+        this.softViewer = viewer;
     }
 
     /** This method is called from within the constructor to
@@ -71,21 +77,19 @@ public class GEOSearchDialog extends javax.swing.JDialog implements SearchResult
         searchBtn = new javax.swing.JButton();
         bottomPane = new javax.swing.JPanel();
         viewBtn = new javax.swing.JButton();
-        jPanel1 = new javax.swing.JPanel();
+        resultPane = new javax.swing.JPanel();
         resultScrollPane = new javax.swing.JScrollPane();
         resultTable = new javax.swing.JTable();
-        jPanel2 = new javax.swing.JPanel();
+        resultControlPane = new javax.swing.JPanel();
         prevBtn = new javax.swing.JButton();
-        jLabel1 = new javax.swing.JLabel();
+        pageLbl = new javax.swing.JLabel();
         pageField = new javax.swing.JTextField();
         totalLbl = new javax.swing.JLabel();
         nextBtn = new javax.swing.JButton();
-        jPanel3 = new javax.swing.JPanel();
+        statusPane = new javax.swing.JPanel();
         statusLbl = new javax.swing.JLabel();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Search GEO");
-        getContentPane().setLayout(new java.awt.BorderLayout(2, 2));
+        setLayout(new java.awt.BorderLayout(2, 2));
 
         searchPane.setBorder(javax.swing.BorderFactory.createTitledBorder("Enter Search Term"));
         searchPane.setLayout(new java.awt.BorderLayout(2, 2));
@@ -106,7 +110,7 @@ public class GEOSearchDialog extends javax.swing.JDialog implements SearchResult
         });
         searchPane.add(searchBtn, java.awt.BorderLayout.LINE_END);
 
-        getContentPane().add(searchPane, java.awt.BorderLayout.PAGE_START);
+        add(searchPane, java.awt.BorderLayout.PAGE_START);
 
         viewBtn.setText(" View ");
         viewBtn.addActionListener(new java.awt.event.ActionListener() {
@@ -116,10 +120,10 @@ public class GEOSearchDialog extends javax.swing.JDialog implements SearchResult
         });
         bottomPane.add(viewBtn);
 
-        getContentPane().add(bottomPane, java.awt.BorderLayout.PAGE_END);
+        add(bottomPane, java.awt.BorderLayout.PAGE_END);
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Results"));
-        jPanel1.setLayout(new java.awt.BorderLayout());
+        resultPane.setBorder(javax.swing.BorderFactory.createTitledBorder("Results"));
+        resultPane.setLayout(new java.awt.BorderLayout());
 
         resultScrollPane.setPreferredSize(new java.awt.Dimension(452, 202));
 
@@ -156,7 +160,7 @@ public class GEOSearchDialog extends javax.swing.JDialog implements SearchResult
         });
         resultScrollPane.setViewportView(resultTable);
 
-        jPanel1.add(resultScrollPane, java.awt.BorderLayout.CENTER);
+        resultPane.add(resultScrollPane, java.awt.BorderLayout.CENTER);
 
         prevBtn.setText(" << ");
         prevBtn.addActionListener(new java.awt.event.ActionListener() {
@@ -164,10 +168,10 @@ public class GEOSearchDialog extends javax.swing.JDialog implements SearchResult
                 prevBtnActionPerformed(evt);
             }
         });
-        jPanel2.add(prevBtn);
+        resultControlPane.add(prevBtn);
 
-        jLabel1.setText("Page");
-        jPanel2.add(jLabel1);
+        pageLbl.setText("Page");
+        resultControlPane.add(pageLbl);
 
         pageField.setText("0");
         pageField.setMinimumSize(new java.awt.Dimension(50, 27));
@@ -177,10 +181,10 @@ public class GEOSearchDialog extends javax.swing.JDialog implements SearchResult
                 pageFieldActionPerformed(evt);
             }
         });
-        jPanel2.add(pageField);
+        resultControlPane.add(pageField);
 
         totalLbl.setText("of ");
-        jPanel2.add(totalLbl);
+        resultControlPane.add(totalLbl);
 
         nextBtn.setText(" >> ");
         nextBtn.addActionListener(new java.awt.event.ActionListener() {
@@ -188,20 +192,18 @@ public class GEOSearchDialog extends javax.swing.JDialog implements SearchResult
                 nextBtnActionPerformed(evt);
             }
         });
-        jPanel2.add(nextBtn);
+        resultControlPane.add(nextBtn);
 
-        jPanel1.add(jPanel2, java.awt.BorderLayout.PAGE_START);
+        resultPane.add(resultControlPane, java.awt.BorderLayout.PAGE_START);
 
-        jPanel3.setLayout(new java.awt.BorderLayout());
+        statusPane.setLayout(new java.awt.BorderLayout());
 
         statusLbl.setText("  ");
-        jPanel3.add(statusLbl, java.awt.BorderLayout.EAST);
+        statusPane.add(statusLbl, java.awt.BorderLayout.EAST);
 
-        jPanel1.add(jPanel3, java.awt.BorderLayout.PAGE_END);
+        resultPane.add(statusPane, java.awt.BorderLayout.PAGE_END);
 
-        getContentPane().add(jPanel1, java.awt.BorderLayout.CENTER);
-
-        pack();
+        add(resultPane, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
 
     private void searchBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchBtnActionPerformed
@@ -251,31 +253,7 @@ public class GEOSearchDialog extends javax.swing.JDialog implements SearchResult
             Object value = resultTable.getModel().getValueAt(row, 0);
             if (value != null && !"".equals(value)) {
             // Download file
-            SOFTDownloadTask task = new SOFTDownloadTask(new String[]{(String)value}, new SOFTViewer() {
-
-                    public void viewSOFT(List<SOFT> list) {
-                        for (SOFT soft : list) {
-                            if (soft.getType() == SOFT.Type.GSE) {
-                                GSEViewerDialog dialog = new GSEViewerDialog(Cytoscape.getDesktop(), false);
-                                dialog.setSOFT(soft);
-                                dialog.setSize(600, 500);
-                                dialog.setVisible(true);
-                            } else if (soft.getType() == SOFT.Type.GDS) {
-                                GDSViewerDialog dialog = new GDSViewerDialog(Cytoscape.getDesktop(), false);
-                                dialog.setSOFT(soft);
-                                dialog.setVisible(true);
-                            } else if (soft.getType() == SOFT.Type.GPL) {
-                                GEOQueryUI.showSOFTViewerDialog(Cytoscape.getDesktop(), false, soft);
-                            } else {
-                                throw new UnsupportedOperationException("Wrong SOFT type: " + soft.getType() + ", Should be GSE/GDS/GPL");
-                            }
-                        }
-                    }
-
-                    public void closeView(SOFT soft) {
-                        // not implemented
-                    }
-                }, SOFT.Format.quick);
+            SOFTDownloadTask task = new SOFTDownloadTask(new String[]{(String)value}, softViewer, SOFT.Format.quick);
             JTaskConfig config = task.getDefaultTaskConfig();
 
             TaskManager.executeTask(task, config);
@@ -299,13 +277,15 @@ public class GEOSearchDialog extends javax.swing.JDialog implements SearchResult
     public static void main(String args[]) {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                GEOSearchDialog dialog = new GEOSearchDialog(new javax.swing.JFrame(), true);
+                JDialog dialog = new JDialog(new javax.swing.JFrame(), true);
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {
                         System.exit(0);
                     }
                 });
+                dialog.setContentPane(new GEOSearchPane(null));
+                dialog.setSize(600, 800);
                 dialog.setVisible(true);
             }
         });
@@ -313,19 +293,19 @@ public class GEOSearchDialog extends javax.swing.JDialog implements SearchResult
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel bottomPane;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel2;
-    private javax.swing.JPanel jPanel3;
     private javax.swing.JButton nextBtn;
     private javax.swing.JTextField pageField;
+    private javax.swing.JLabel pageLbl;
     private javax.swing.JButton prevBtn;
+    private javax.swing.JPanel resultControlPane;
+    private javax.swing.JPanel resultPane;
     private javax.swing.JScrollPane resultScrollPane;
     private javax.swing.JTable resultTable;
     private javax.swing.JButton searchBtn;
     private javax.swing.JTextField searchFld;
     private javax.swing.JPanel searchPane;
     private javax.swing.JLabel statusLbl;
+    private javax.swing.JPanel statusPane;
     private javax.swing.JLabel totalLbl;
     private javax.swing.JButton viewBtn;
     // End of variables declaration//GEN-END:variables

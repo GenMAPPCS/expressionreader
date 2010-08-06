@@ -14,8 +14,12 @@ package org.genmapp.expressionreader.geo.ui;
 import cytoscape.Cytoscape;
 import cytoscape.task.ui.JTaskConfig;
 import cytoscape.task.util.TaskManager;
+import java.awt.event.WindowEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.List;
 import java.util.Map;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.table.AbstractTableModel;
 import org.genmapp.expressionreader.geo.GEOQuery;
@@ -110,6 +114,8 @@ public class GDSSubsetViewerPane extends javax.swing.JPanel implements SOFTViewe
         jPanel3.add(typeField);
 
         jPanel1.add(jPanel3, java.awt.BorderLayout.PAGE_START);
+
+        jScrollPane1.setPreferredSize(new java.awt.Dimension(452, 252));
 
         sampleTable.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -241,15 +247,22 @@ public class GDSSubsetViewerPane extends javax.swing.JPanel implements SOFTViewe
     public void viewSOFT(List<SOFT> list) {
         for (SOFT soft: list) {
             SOFTViewerPane pane = new SOFTViewerPane();
-            pane.setOwner(this);
+            pane.addPropertyChangeListener(new PropertyChangeListener() {
+
+                public void propertyChange(PropertyChangeEvent pce) {
+                    if (pce.getPropertyName().equals("SOFTViewer_ViewStatus")) {
+                        if (pce.getNewValue() instanceof Integer) {
+                            if ((Integer)pce.getNewValue() == WindowEvent.WINDOW_CLOSING) {
+                                sampleTabbedPane.remove((JComponent)pce.getSource());
+                            }
+                        }
+                    }
+                }
+            });
             pane.setSoft(soft);
             sampleTabbedPane.add(soft.getId(), pane);
             sampleTabbedPane.setSelectedComponent(pane);
         }
-    }
-
-    public void closeView(SOFT soft) {
-        sampleTabbedPane.remove(sampleTabbedPane.indexOfTab(soft.getId()));
     }
 
     public static void main(String[] args) throws Exception {

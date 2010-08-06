@@ -6,6 +6,7 @@
 
 package org.genmapp.expressionreader.geo.ui;
 
+import java.awt.event.WindowEvent;
 import org.genmapp.expressionreader.geo.data.SOFT;
 import org.genmapp.expressionreader.geo.GEOQuery;
 import java.util.ArrayList;
@@ -21,19 +22,10 @@ import org.genmapp.expressionreader.geo.data.DataTable;
  */
 public class SOFTViewerPane extends javax.swing.JPanel {
     private SOFT soft;
-    private SOFTViewer owner;
 
     /** Creates new form SOFTViewerPane */
     public SOFTViewerPane() {
         initComponents();
-    }
-
-    public SOFTViewer getOwner() {
-        return owner;
-    }
-
-    public void setOwner(SOFTViewer owner) {
-        this.owner = owner;
     }
 
     public SOFT getSoft() {
@@ -229,7 +221,7 @@ public class SOFTViewerPane extends javax.swing.JPanel {
 }//GEN-LAST:event_viewInBrowserBtnActionPerformed
 
     private void closeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_closeButtonActionPerformed
-        owner.closeView(soft);
+        this.firePropertyChange("SOFTViewer_ViewStatus", WindowEvent.WINDOW_OPENED, WindowEvent.WINDOW_CLOSING);
     }//GEN-LAST:event_closeButtonActionPerformed
 
 
