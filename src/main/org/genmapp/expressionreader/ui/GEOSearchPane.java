@@ -41,7 +41,6 @@ import javax.swing.table.TableColumn;
 import org.genmapp.expressionreader.geo.data.SOFT;
 import org.genmapp.expressionreader.tasks.GEOSearchTask;
 import org.genmapp.expressionreader.tasks.SOFTDownloadTask;
-import org.genmapp.expressionreader.tasks.SearchResultViewer;
 
 /**
  *
@@ -76,6 +75,11 @@ public class GEOSearchPane extends javax.swing.JPanel implements SearchResultVie
 
     public void setSoftViewer(SOFTViewer viewer) {
         this.softViewer = viewer;
+    }
+
+    public void search(String query) {
+        this.searchFld.setText(query);
+        this.searchBtnActionPerformed(null);
     }
 
     /** This method is called from within the constructor to
@@ -364,8 +368,5 @@ public class GEOSearchPane extends javax.swing.JPanel implements SearchResultVie
 
             model.addRow(row);
         }
-
-
     }
-
 }

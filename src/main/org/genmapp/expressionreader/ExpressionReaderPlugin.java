@@ -18,13 +18,13 @@ package org.genmapp.expressionreader;
 
 import javax.swing.JMenu;
 
-import org.genmapp.expressionreader.actions.ArrayExpressionImportAction;
 import org.genmapp.expressionreader.actions.GEOImportAction;
 import cytoscape.Cytoscape;
+import cytoscape.command.CyCommandManager;
+import cytoscape.command.CyCommandNamespace;
 import cytoscape.logger.CyLogger;
 import cytoscape.plugin.CytoscapePlugin;
 import cytoscape.view.CytoscapeDesktop;
-import org.genmapp.expressionreader.actions.GEOSearchAction;
 
 /**
  * This plugin reads gene expression data from GEO and ArrayExpress
@@ -47,17 +47,18 @@ public class ExpressionReaderPlugin extends CytoscapePlugin {
         }
 
         JMenu pluginMenu = Cytoscape.getDesktop().getCyMenus().getOperationsMenu();
-        JMenu geReaderMenu = new JMenu("Gene Expression Reader");
-        pluginMenu.add(geReaderMenu);
-        JMenu geoMenu = new JMenu("GEO");
-        geReaderMenu.add(geoMenu);
+        JMenu readerMenu = new JMenu("Gene Expression Reader");
+        pluginMenu.add(readerMenu);
 
         try {
-            geoMenu.add(new GEOImportAction());
-            geoMenu.add(new GEOSearchAction());
-//            geReaderMenu.add(new ArrayExpressionImportAction());
+            readerMenu.add(new GEOImportAction());
         } catch (Exception e) {
             logger.error("Unable to initialize menus: " + e.getMessage(), e);
         }
+
+        // register CyCommand
+        CyCommandNamespace ns = CyCommandManager.reserveNamespace("org.genmapp.expressionreader");
+
+        CyCommandManager.register(ns, GEOImportAction.COMMAND, new GEOImportAction());
     }
 }

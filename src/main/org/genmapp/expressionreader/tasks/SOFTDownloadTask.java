@@ -13,11 +13,6 @@
  limitations under the License. 
  */
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package org.genmapp.expressionreader.tasks;
 
 import cytoscape.logger.CyLogger;

@@ -49,28 +49,6 @@ public class GEOSearchTaskTest {
     @Test
     public void testRun() {
         System.out.println("run");
-
-        ESearchRequest request = new ESearchRequest();
-        request.setDb("gds");
-        request.setRetMax("5");
-        request.setRetStart("220");
-        request.setTerm("test");
-
-        GEOSearchTask instance = new GEOSearchTask(request, new SearchResultViewer() {
-            public void viewResults(int total, List<DocSumType> list) {
-                System.out.println("Searching for 'test'");
-                System.out.println("Number of records found: " + total);
-                for (DocSumType docsum : list) {
-                    List<ItemType> items = docsum.getItem();
-                    System.out.println("-------------------------------------");
-                    for (ItemType item : items) {
-                        System.out.println("    " + item.getName() + ": " + item.getItemContent());
-                    }
-                }
-            }
-        });
-        JTaskConfig config = new JTaskConfig();
-        TaskManager.executeTask(instance, config);
     }
 
     /**

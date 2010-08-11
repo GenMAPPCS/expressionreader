@@ -30,6 +30,7 @@ import gov.nih.nlm.ncbi.soap.eutils.esummary.ESummaryResult;
 import java.util.List;
 import javax.swing.SwingUtilities;
 import org.genmapp.expressionreader.geo.GEOQuery;
+import org.genmapp.expressionreader.ui.SearchResultViewer;
 
 /**
  *

@@ -212,7 +212,7 @@ public class GEOQuery {
         else if (geoId.startsWith("GDS"))
             return SOFT.Type.GDS;
         else
-            throw new UnsupportedOperationException("Can't associate any type to GEOID " + geoId);
+            return null;
 
     }
 
