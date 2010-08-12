@@ -289,8 +289,8 @@ public class GroupPane extends javax.swing.JPanel {
     private void deleteBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteBtnActionPerformed
         int[] rows = sampleTable.getSelectedRows();
         for (int i = rows.length-1; i >=0; i--) {
-            SOFT soft = softList.get(i);
-            softList.remove(i);
+            SOFT soft = softList.get(rows[i]);
+            softList.remove(rows[i]);
 
             // also close view if it's open
             int index = sampleTabbedPane.indexOfTab(soft.getId());
