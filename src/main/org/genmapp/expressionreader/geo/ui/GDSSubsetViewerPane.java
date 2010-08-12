@@ -88,8 +88,8 @@ public class GDSSubsetViewerPane extends javax.swing.JPanel implements SOFTViewe
         sampleTabbedPane.setPreferredSize(new java.awt.Dimension(12, 320));
         jSplitPane1.setRightComponent(sampleTabbedPane);
 
-        jPanel1.setMinimumSize(new java.awt.Dimension(192, 302));
-        jPanel1.setPreferredSize(new java.awt.Dimension(452, 578));
+        jPanel1.setMinimumSize(new java.awt.Dimension(192, 150));
+        jPanel1.setPreferredSize(new java.awt.Dimension(452, 278));
         jPanel1.setLayout(new java.awt.BorderLayout());
 
         viewSampleBtn.setText("  View  ");
@@ -281,7 +281,7 @@ public class GDSSubsetViewerPane extends javax.swing.JPanel implements SOFTViewe
     }
 
     public static void main(String[] args) throws Exception {
-        final SOFT soft = GEOQuery.getGDS("GDS507");
+        final SOFT soft = GEOQuery.getGDS("GDS36");
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 JDialog dialog = new JDialog();

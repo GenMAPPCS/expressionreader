@@ -41,9 +41,9 @@ public class SOFTParser {
 
     public static final String SAMPLE = "SAMPLE";
     public static final String PLATFORM = "PLATFORM";
-    private static final String ID_PATTERN = "\\^(.*)\\s=\\s(.*)";
-    private static final String FIELD_PATTERN = "\\!(.*)\\s=\\s(.*)";
-    private static final String TABLE_HEADER_PATTERN = "\\#(.*)\\s=\\s(.*)";
+    private static final String ID_PATTERN = "\\^(.*?)\\s=\\s(.*)";
+    private static final String FIELD_PATTERN = "\\!(.*?)\\s=\\s(.*)";
+    private static final String TABLE_HEADER_PATTERN = "\\#(.*?)\\s=\\s(.*)";
     private static final String TABLE_PATTERN = "\\!(.*)_table_begin(\\s=\\s(.*))?";
     private String currentId = null;
     private String currentType = null;
