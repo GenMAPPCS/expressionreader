@@ -25,6 +25,7 @@ import cytoscape.command.CyCommandNamespace;
 import cytoscape.logger.CyLogger;
 import cytoscape.plugin.CytoscapePlugin;
 import cytoscape.view.CytoscapeDesktop;
+import org.genmapp.expressionreader.commands.GEOImportCyCommandHandler;
 
 /**
  * This plugin reads gene expression data from GEO and ArrayExpress
@@ -59,6 +60,7 @@ public class ExpressionReaderPlugin extends CytoscapePlugin {
         // register CyCommand
         CyCommandNamespace ns = CyCommandManager.reserveNamespace("org.genmapp.expressionreader");
 
-        CyCommandManager.register(ns, GEOImportAction.COMMAND, new GEOImportAction());
+        CyCommandManager.register(ns, GEOImportCyCommandHandler.COMMAND_IMPORT, new GEOImportCyCommandHandler());
+        CyCommandManager.register(ns, GEOImportCyCommandHandler.COMMAND_TOGGLE, new GEOImportCyCommandHandler());
     }
 }

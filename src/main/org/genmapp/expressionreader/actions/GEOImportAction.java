@@ -24,22 +24,16 @@ import java.awt.event.ActionEvent;
 import javax.swing.JOptionPane;
 
 import cytoscape.Cytoscape;
-import cytoscape.command.CyCommandException;
-import cytoscape.command.CyCommandHandler;
-import cytoscape.command.CyCommandResult;
 import cytoscape.data.CyAttributes;
-import cytoscape.layout.Tunable;
 import cytoscape.logger.CyLogger;
 import cytoscape.task.ui.JTaskConfig;
 import cytoscape.task.util.TaskManager;
 import cytoscape.util.CytoscapeAction;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import javax.swing.JDialog;
+import org.genmapp.expressionreader.commands.GEOImportCyCommandHandler;
 import org.genmapp.expressionreader.geo.GEOQuery;
 import org.genmapp.expressionreader.geo.data.DataTable;
 import org.genmapp.expressionreader.tasks.SOFTDownloadTask;
@@ -50,12 +44,11 @@ import org.genmapp.expressionreader.geo.ui.SOFTViewer;
 import org.genmapp.expressionreader.ui.GEOSearchPane;
 import org.genmapp.expressionreader.ui.GSMImportDialog;
 
-public class GEOImportAction extends CytoscapeAction implements SOFTViewer, CyCommandHandler {
+public class GEOImportAction extends CytoscapeAction implements SOFTViewer {
 
     private static final long serialVersionUID = 1128930960050800232L;
 
     static public CyLogger logger = CyLogger.getLogger(GEOImportAction.class);
-    private static boolean USE_ID_MAPPING = false;
 
     public GEOImportAction() {
         super("GEO");
@@ -118,7 +111,7 @@ public class GEOImportAction extends CytoscapeAction implements SOFTViewer, CyCo
 
         SOFT soft = list.get(0);
         if (soft.getType() == SOFT.Type.GSM) { // If GSM, import it
-            if (this.USE_ID_MAPPING) {
+            if (GEOImportCyCommandHandler.USE_ID_MAPPING) {
                 // create new network
                 // create a new network, and bring up CyCommand
                 CyAttributes cyattrs = Cytoscape.getNodeAttributes();
@@ -132,14 +125,12 @@ public class GEOImportAction extends CytoscapeAction implements SOFTViewer, CyCo
                         CyNode node = Cytoscape.getCyNode(key, true);
                         int headerIndex = 0;
                         for (String header : headers) {
-                            cyattrs.setAttribute(key, header, Double.valueOf((String) dt.getData().get(key).get(headerIndex)));
+                            cyattrs.setAttribute(key, header, (String) dt.getData().get(key).get(headerIndex));
                             headerIndex++;
                         }
                         nodes.add(node);
                     }
-                    Cytoscape.createNetwork(nodes, new ArrayList<CyEdge>(), "Imported " + s.getId());
-
-                    // TODO: Brings up CyCommand
+                    Cytoscape.createNetwork(nodes, new ArrayList<CyEdge>(), s.getId());
                 }
             } else {
                 GSMImportDialog dialog = new GSMImportDialog(Cytoscape.getDesktop(), false);
@@ -160,60 +151,4 @@ public class GEOImportAction extends CytoscapeAction implements SOFTViewer, CyCo
         }
     }
 
-
-    public final static String COMMAND = "GEO Sample Import";
-
-    public List<String> getCommands() {
-        List<String> val = new ArrayList<String>();
-        val.add(COMMAND);
-        return val;
-    }
-
-    public List<String> getArguments(String command) {
-        if (COMMAND.equals(command)) {
-            List<String> args = new ArrayList<String>();
-            args.add("useIdMapping");
-            return args;
-        }
-        return null;
-    }
-
-    public Map<String, Object> getSettings(String string) {
-        Map<String, Object> val = new HashMap<String, Object>();
-        val.put("useIdMapping", false);
-        return val;
-    }
-
-    public Map<String, Tunable> getTunables(String string) {
-        Tunable t = new Tunable("useIdMapping", "Whether to use CyThesaurus ID Mapping Service", Tunable.BOOLEAN, false);
-        Map<String, Tunable> map = new HashMap<String, Tunable>();
-        map.put(t.getName(), t);
-        return map;
-    }
-
-    public String getDescription(String string) {
-        return "This CyCommandHandler sets the 'Create Network View' toggle for Gene Expression Data Reader";
-    }
-
-    public CyCommandResult execute(String command, Map<String, Object> map) throws CyCommandException {
-        CyCommandResult result = new CyCommandResult();
-        if (COMMAND.equals(command)) {
-            Boolean val = (Boolean)map.get("useIdMapping");
-            USE_ID_MAPPING = val;
-            result.addMessage("useIdMapping sets to " + val);
-        }
-        return result;
-    }
-
-    public CyCommandResult execute(String string, Collection<Tunable> clctn) throws CyCommandException {
-        Map<String, Object> kvSettings = new HashMap();
-        for (Tunable t: clctn) {
-            Object v = t.getValue();
-            if (v != null)
-                kvSettings.put(t.getName(), v.toString());
-            else
-                kvSettings.put(t.getName(), null);
-        }
-        return execute(string, kvSettings);
-    }
 }

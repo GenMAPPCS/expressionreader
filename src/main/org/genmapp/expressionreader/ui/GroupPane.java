@@ -13,16 +13,6 @@
  limitations under the License. 
  */
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/*
- * GroupPane.java
- *
- * Created on Aug 4, 2010, 3:20:28 PM
- */
 package org.genmapp.expressionreader.ui;
 
 import cytoscape.task.ui.JTaskConfig;
