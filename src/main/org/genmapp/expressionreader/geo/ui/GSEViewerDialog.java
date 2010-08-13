@@ -58,6 +58,7 @@ import javax.swing.TransferHandler;
 import javax.swing.border.TitledBorder;
 import javax.swing.plaf.basic.BasicComboBoxUI.PropertyChangeHandler;
 import javax.swing.table.AbstractTableModel;
+import org.genmapp.expressionreader.actions.GEOImportAction;
 import org.genmapp.expressionreader.geo.data.DataTable;
 import org.genmapp.expressionreader.geo.data.GSE;
 import org.genmapp.expressionreader.ui.GSMImportDialog;
@@ -225,7 +226,6 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
         sampleButtonPane = new javax.swing.JPanel();
         viewSampleBtn = new javax.swing.JButton();
         importSampleBtn = new javax.swing.JButton();
-        addToGruopBtn = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         sampleTable = new javax.swing.JTable();
         platformPane = new javax.swing.JPanel();
@@ -277,10 +277,6 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
             }
         });
         sampleButtonPane.add(importSampleBtn);
-
-        addToGruopBtn.setText(" Group ");
-        addToGruopBtn.setEnabled(false);
-        sampleButtonPane.add(addToGruopBtn);
 
         samplePane.add(sampleButtonPane, java.awt.BorderLayout.PAGE_END);
 
@@ -449,14 +445,9 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
             SOFTDownloadTask task = new SOFTDownloadTask(ids, new SOFTViewer() {
 
                 public void viewSOFT(List<SOFT> list) {
-                    GSMImportDialog dialog = new GSMImportDialog(Cytoscape.getDesktop(), false);
-                    dialog.setSOFTList(list);
-                    dialog.setVisible(true);
+                    GEOImportAction.viewSample(list);
                 }
-
-                public void closeView(SOFT soft) {
-                    // do nothing
-                }
+                
             }, SOFT.Format.full);
             TaskManager.executeTask(task, task.getDefaultTaskConfig());
         }
@@ -634,7 +625,6 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addGroupBtn;
-    private javax.swing.JButton addToGruopBtn;
     private javax.swing.JSplitPane contentSplitPane;
     private javax.swing.JList groupList;
     private javax.swing.JPanel groupsPane;

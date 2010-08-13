@@ -32,7 +32,7 @@ import org.genmapp.expressionreader.commands.GEOImportCyCommandHandler;
  */
 public class ExpressionReaderPlugin extends CytoscapePlugin {
 
-    static public CyLogger logger = CyLogger.getLogger(ExpressionReaderPlugin.class);
+    private static CyLogger logger = CyLogger.getLogger(ExpressionReaderPlugin.class);
 
     /**
      * This is the main constructor, which will be called by Cytoscape's Plugin
@@ -58,9 +58,7 @@ public class ExpressionReaderPlugin extends CytoscapePlugin {
         }
 
         // register CyCommand
-        CyCommandNamespace ns = CyCommandManager.reserveNamespace("org.genmapp.expressionreader");
-
-        CyCommandManager.register(ns, GEOImportCyCommandHandler.COMMAND_IMPORT, new GEOImportCyCommandHandler());
+        CyCommandNamespace ns = CyCommandManager.reserveNamespace(GEOImportCyCommandHandler.NAMESPACE);
         CyCommandManager.register(ns, GEOImportCyCommandHandler.COMMAND_TOGGLE, new GEOImportCyCommandHandler());
     }
 }

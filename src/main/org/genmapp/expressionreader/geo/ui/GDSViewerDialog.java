@@ -38,7 +38,7 @@ import org.genmapp.expressionreader.geo.data.SOFT;
  *
  * @author djiao
  */
-public class GDSViewerDialog extends javax.swing.JDialog implements SOFTViewer {
+public class GDSViewerDialog extends javax.swing.JDialog {
 
     private GDS gds;
 
@@ -128,9 +128,5 @@ public class GDSViewerDialog extends javax.swing.JDialog implements SOFTViewer {
         } else {
             throw new RuntimeException("Wrong SOFT type");
         }
-    }
-
-    public void viewSOFT(List<SOFT> soft) {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

@@ -37,6 +37,7 @@ import java.util.Map;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.table.AbstractTableModel;
+import org.genmapp.expressionreader.actions.GEOImportAction;
 import org.genmapp.expressionreader.geo.GEOQuery;
 import org.genmapp.expressionreader.geo.data.GDS;
 import org.genmapp.expressionreader.geo.data.SOFT;
@@ -171,14 +172,9 @@ public class GDSSubsetViewerPane extends javax.swing.JPanel implements SOFTViewe
             SOFTDownloadTask task = new SOFTDownloadTask(ids, new SOFTViewer() {
 
                 public void viewSOFT(List<SOFT> list) {
-                    GSMImportDialog dialog = new GSMImportDialog(Cytoscape.getDesktop(), false);
-                    dialog.setSOFTList(list);
-                    dialog.setVisible(true);
+                    GEOImportAction.viewSample(list);
                 }
 
-                public void closeView(SOFT soft) {
-                    // do nothing
-                }
             }, SOFT.Format.full);
             TaskManager.executeTask(task, task.getDefaultTaskConfig());
         }

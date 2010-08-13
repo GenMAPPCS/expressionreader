@@ -111,32 +111,7 @@ public class GEOImportAction extends CytoscapeAction implements SOFTViewer {
 
         SOFT soft = list.get(0);
         if (soft.getType() == SOFT.Type.GSM) { // If GSM, import it
-            if (GEOImportCyCommandHandler.USE_ID_MAPPING) {
-                // create new network
-                // create a new network, and bring up CyCommand
-                CyAttributes cyattrs = Cytoscape.getNodeAttributes();
-                for (SOFT s : list) {
-                    DataTable dt = s.getDataTables().get(0);
-
-                    Set<String> headers = dt.getHeaders().keySet();
-                    Set<String> keys = dt.getData().keySet();
-                    List<CyNode> nodes = new ArrayList<CyNode>();
-                    for (String key : keys) {
-                        CyNode node = Cytoscape.getCyNode(key, true);
-                        int headerIndex = 0;
-                        for (String header : headers) {
-                            cyattrs.setAttribute(key, header, (String) dt.getData().get(key).get(headerIndex));
-                            headerIndex++;
-                        }
-                        nodes.add(node);
-                    }
-                    Cytoscape.createNetwork(nodes, new ArrayList<CyEdge>(), s.getId());
-                }
-            } else {
-                GSMImportDialog dialog = new GSMImportDialog(Cytoscape.getDesktop(), false);
-                dialog.setSOFTList(list);
-                dialog.setVisible(true);
-            }
+            viewSample(list);
         } else if (soft.getType() == SOFT.Type.GSE) {
             GSEViewerDialog dialog = new GSEViewerDialog(Cytoscape.getDesktop(), false);
             dialog.setSize(600, 500);
@@ -151,4 +126,32 @@ public class GEOImportAction extends CytoscapeAction implements SOFTViewer {
         }
     }
 
+    public static void viewSample(List<SOFT> list) {
+        if (GEOImportCyCommandHandler.USE_ID_MAPPING) {
+            // create new network
+            // create a new network, and bring up CyCommand
+            CyAttributes cyattrs = Cytoscape.getNodeAttributes();
+            for (SOFT s : list) {
+                DataTable dt = s.getDataTables().get(0);
+
+                Set<String> headers = dt.getHeaders().keySet();
+                Set<String> keys = dt.getData().keySet();
+                List<CyNode> nodes = new ArrayList<CyNode>();
+                for (String key : keys) {
+                    CyNode node = Cytoscape.getCyNode(key, true);
+                    int headerIndex = 0;
+                    for (String header : headers) {
+                        cyattrs.setAttribute(key, header, (String) dt.getData().get(key).get(headerIndex));
+                        headerIndex++;
+                    }
+                    nodes.add(node);
+                }
+                Cytoscape.createNetwork(nodes, new ArrayList<CyEdge>(), s.getId());
+            }
+        } else {
+            GSMImportDialog dialog = new GSMImportDialog(Cytoscape.getDesktop(), false);
+            dialog.setSOFTList(list);
+            dialog.setVisible(true);
+        }
+    }
 }

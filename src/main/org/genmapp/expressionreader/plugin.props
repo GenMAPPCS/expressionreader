@@ -10,13 +10,13 @@ pluginName=ExpressionReader
 
 # Description used to give users information about the plugin such as what it does.  
 # Html tags are encouraged for formatting purposes.
-pluginDescription=This plugin reads Gene Expression Data
+pluginDescription=This plugin reads Gene Expression Data from data repositories such as GEO
 
 # Plugin version number, this must be two numbers separated by a decimlal.  Ex. 0.2, 14.03
 pluginVersion=0.1
 
 # Compatible Cytoscape version
-cytoscapeVersion=2.6.3,2.7.0
+cytoscapeVersion=2.7.0
 
 # Category, use one of the categories listed on the website or create your own
 pluginCategory=Network and Attribute I/O
@@ -28,7 +28,7 @@ projectURL=
 
 # List of authors.  Note each author and institution pair are separated by a : (colon)
 # each additional author institution pair must be separated from other pairs bye a ; (semicolon)
-pluginAuthorsIntsitutions=Dazhi Jiao:Indiana University School of Informatics
+pluginAuthorsIntsitutions=Dazhi Jiao:Indiana University School of Informatics; Alex Pico:The Gladstone Institutes, UCSF
 
 # Date this plugin/plugin version was released
 releaseDate=
