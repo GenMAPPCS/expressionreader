@@ -41,6 +41,14 @@
 
       <Layout class="org.netbeans.modules.form.compat2.layouts.DesignFlowLayout"/>
       <SubComponents>
+        <Component class="javax.swing.JButton" name="viewSeriesBtn">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="View Series"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="viewSeriesBtnActionPerformed"/>
+          </Events>
+        </Component>
         <Component class="javax.swing.JButton" name="viewInBrowserBtn">
           <Properties>
             <Property name="text" type="java.lang.String" value="View in Browser"/>

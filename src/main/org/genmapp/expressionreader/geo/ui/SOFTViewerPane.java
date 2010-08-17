@@ -21,6 +21,9 @@
 
 package org.genmapp.expressionreader.geo.ui;
 
+import cytoscape.Cytoscape;
+import cytoscape.task.ui.JTaskConfig;
+import cytoscape.task.util.TaskManager;
 import java.awt.event.WindowEvent;
 import org.genmapp.expressionreader.geo.data.SOFT;
 import org.genmapp.expressionreader.geo.GEOQuery;
@@ -30,6 +33,7 @@ import java.util.List;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.AbstractTableModel;
 import org.genmapp.expressionreader.geo.data.DataTable;
+import org.genmapp.expressionreader.tasks.SOFTDownloadTask;
 
 /**
  *
@@ -120,6 +124,13 @@ public class SOFTViewerPane extends javax.swing.JPanel {
             }
         });
 
+        if (soft.getType() == SOFT.Type.GDS) {
+            this.viewSeriesBtn.setEnabled(true);
+        } else if (soft.getType() == SOFT.Type.GSM) {
+            this.viewSeriesBtn.setVisible(false);
+        } else {
+            this.viewSeriesBtn.setVisible(false);
+        }
     }
 
     
@@ -137,6 +148,7 @@ public class SOFTViewerPane extends javax.swing.JPanel {
         sampleNamePane = new javax.swing.JPanel();
         sampleNameLbl = new javax.swing.JLabel();
         viewInBrowserPane = new javax.swing.JPanel();
+        viewSeriesBtn = new javax.swing.JButton();
         viewInBrowserBtn = new javax.swing.JButton();
         closeButton = new javax.swing.JButton();
         jSplitPane1 = new javax.swing.JSplitPane();
@@ -158,6 +170,14 @@ public class SOFTViewerPane extends javax.swing.JPanel {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(sampleNamePane, gridBagConstraints);
+
+        viewSeriesBtn.setText("View Series");
+        viewSeriesBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                viewSeriesBtnActionPerformed(evt);
+            }
+        });
+        viewInBrowserPane.add(viewSeriesBtn);
 
         viewInBrowserBtn.setText("View in Browser");
         viewInBrowserBtn.addActionListener(new java.awt.event.ActionListener() {
@@ -239,6 +259,29 @@ public class SOFTViewerPane extends javax.swing.JPanel {
         this.firePropertyChange("SOFTViewer_ViewStatus", WindowEvent.WINDOW_OPENED, WindowEvent.WINDOW_CLOSING);
     }//GEN-LAST:event_closeButtonActionPerformed
 
+    private void viewSeriesBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewSeriesBtnActionPerformed
+        String gse = null;
+        if (this.soft.getType() == SOFT.Type.GDS) {
+            gse = (String)this.soft.getFields().get("dataset_reference_series");
+        } else if (this.soft.getType() == SOFT.Type.GSM) {
+            gse = (String)this.soft.getFields().get("Sample_series_id");
+        }
+
+        if (gse != null && !"".equals(gse)) {
+            SOFTDownloadTask task = new SOFTDownloadTask(new String[]{gse}, new SOFTViewer() {
+
+                public void viewSOFT(List<SOFT> soft) {
+                    GSEViewerDialog dialog = new GSEViewerDialog(Cytoscape.getDesktop(), false);
+                    dialog.setSize(600, 500);
+                    dialog.setSOFT(soft.get(0));
+                    dialog.setVisible(true);
+                }
+            }, SOFT.Format.quick);
+            JTaskConfig config = task.getDefaultTaskConfig();
+            TaskManager.executeTask(task, config);
+        }
+    }//GEN-LAST:event_viewSeriesBtnActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton closeButton;
@@ -253,5 +296,6 @@ public class SOFTViewerPane extends javax.swing.JPanel {
     private javax.swing.JPanel sampleNamePane;
     private javax.swing.JButton viewInBrowserBtn;
     private javax.swing.JPanel viewInBrowserPane;
+    private javax.swing.JButton viewSeriesBtn;
     // End of variables declaration//GEN-END:variables
 }
