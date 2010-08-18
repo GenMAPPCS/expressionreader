@@ -111,20 +111,18 @@ public class GDSViewerDialog extends javax.swing.JDialog {
             DataTable dt = this.gds.getDataTables().getFirst(); // There should be only one datatable
             List<String> headers = new ArrayList(dt.getHeaders().keySet());
             Map<String, List> data = dt.getData();
-            for (int i = 0; i < headers.size() -2; i++) {
-                List<CyNode> nodes = new ArrayList<CyNode>();
-                for (Map.Entry<String, List> entry: data.entrySet()) {
-                    String probe = entry.getKey();
-                    String identifier = (String)entry.getValue().get(1);
-                    String value = (String)entry.getValue().get(i+2);
-                    CyNode node = Cytoscape.getCyNode(probe, true);
-                    cyattrs.setAttribute(probe, "other_identifier", identifier);
-                    cyattrs.setAttribute(probe, "VALUE", value);
-                    nodes.add(node);
+
+            List<CyNode> nodes = new ArrayList<CyNode>();
+            for (String key : data.keySet()) {
+                CyNode node = Cytoscape.getCyNode(key, true);
+                List values = data.get(key);
+                for (int i = 2; i < values.size(); i++) {
+                    String value = (String)values.get(i);
+                    cyattrs.setAttribute(key, headers.get(i), value);
                 }
-                Cytoscape.createNetwork(nodes, new ArrayList<CyEdge>(), headers.get(i+2));
+                nodes.add(node);
             }
-            
+            Cytoscape.createNetwork(nodes, new ArrayList<CyEdge>(), gds.getId());
         } else {
             GSMImportDialog dialog = new GSMImportDialog(Cytoscape.getDesktop(), false);
             dialog.setTask(new GDSDataImportTask(null, gds));

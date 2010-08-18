@@ -146,7 +146,6 @@ public class GSMImportDialog extends javax.swing.JDialog {
             TaskManager.executeTask(task, config);
             this.dispose();
         } else {
-            System.out.println("Import GDS data");
             JTaskConfig config = this.task.getDefaultTaskConfig();
             task.setNodeAttr((String)nodeAttrCombo.getSelectedItem());
             TaskManager.executeTask(task, config);
