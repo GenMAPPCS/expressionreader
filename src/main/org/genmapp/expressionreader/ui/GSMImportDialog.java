@@ -23,6 +23,8 @@ import java.util.Collections;
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
 import org.genmapp.expressionreader.geo.data.SOFT;
+import org.genmapp.expressionreader.tasks.AbstractTask;
+import org.genmapp.expressionreader.tasks.GDSDataImportTask;
 import org.genmapp.expressionreader.tasks.GSMImportTask;
 
 /**
@@ -31,6 +33,15 @@ import org.genmapp.expressionreader.tasks.GSMImportTask;
  */
 public class GSMImportDialog extends javax.swing.JDialog {
 
+    private GDSDataImportTask task = null;
+
+    public AbstractTask getTask() {
+        return task;
+    }
+
+    public void setTask(GDSDataImportTask task) {
+        this.task = task;
+    }
     private List<SOFT> softList = null;
 
     /** Creates new form GSMDialog */
@@ -129,10 +140,18 @@ public class GSMImportDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_idFieldActionPerformed
 
     private void importBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importBtnActionPerformed
-        GSMImportTask task = new GSMImportTask((String) nodeAttrCombo.getSelectedItem(), softList);
-        JTaskConfig config = task.getDefaultTaskConfig();
-        TaskManager.executeTask(task, config);
-        this.dispose();
+        if (this.task == null) { // Use Default task
+            GSMImportTask task = new GSMImportTask((String) nodeAttrCombo.getSelectedItem(), softList);
+            JTaskConfig config = task.getDefaultTaskConfig();
+            TaskManager.executeTask(task, config);
+            this.dispose();
+        } else {
+            System.out.println("Import GDS data");
+            JTaskConfig config = this.task.getDefaultTaskConfig();
+            task.setNodeAttr((String)nodeAttrCombo.getSelectedItem());
+            TaskManager.executeTask(task, config);
+            this.dispose();
+        }
     }//GEN-LAST:event_importBtnActionPerformed
 
     private void cancelBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelBtnActionPerformed

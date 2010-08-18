@@ -23,7 +23,6 @@ import cytoscape.CyNetwork;
 import cytoscape.CyNode;
 import cytoscape.Cytoscape;
 import cytoscape.data.CyAttributes;
-import cytoscape.task.TaskMonitor;
 import cytoscape.task.ui.JTaskConfig;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -82,7 +81,7 @@ public class GSMImportTask extends AbstractTask {
                 if ("ID".equals(nodeAttr)) {
                     String attrValue = node.getIdentifier();
                     if (importedData.containsKey(attrValue)) {
-                        cyattrs.setAttribute(nid, attrName, Double.valueOf((String) importedData.get(attrValue).get(valueIndex)));
+                        cyattrs.setAttribute(nid, attrName, (String) importedData.get(attrValue).get(valueIndex));
                         totalAdded++;
                     }
                 } else {
@@ -92,7 +91,7 @@ public class GSMImportTask extends AbstractTask {
                             Set<String> keys = importedData.keySet();
                             for (String key: keys) {
                                 if (list.contains(key)) {
-                                    cyattrs.setAttribute(nid, attrName, Double.valueOf((String) importedData.get(key).get(valueIndex)));
+                                    cyattrs.setAttribute(nid, attrName, (String) importedData.get(key).get(valueIndex));
                                     break;
                                 }
                             }
@@ -101,7 +100,7 @@ public class GSMImportTask extends AbstractTask {
                         case CyAttributes.TYPE_STRING:
                             String attrValue = cyattrs.getStringAttribute(nid, nodeAttr);
                             if (importedData.containsKey(attrValue)) {
-                                cyattrs.setAttribute(nid, attrName, Double.valueOf((String) importedData.get(attrValue).get(valueIndex)));
+                                cyattrs.setAttribute(nid, attrName, (String) importedData.get(attrValue).get(valueIndex));
                                 totalAdded++;
                             }
                             break;

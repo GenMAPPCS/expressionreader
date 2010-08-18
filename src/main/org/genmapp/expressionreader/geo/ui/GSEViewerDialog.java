@@ -249,6 +249,7 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
         nameLbl = new javax.swing.JLabel();
         viewInBrowserPane = new javax.swing.JPanel();
         viewInBroswerBtn = new javax.swing.JButton();
+        jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(500, 400));
@@ -403,6 +404,16 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
             }
         });
         viewInBrowserPane.add(viewInBroswerBtn);
+
+        jButton1.setText(" Import ");
+        jButton1.setToolTipText("Coming Soon...");
+        jButton1.setEnabled(false);
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+        viewInBrowserPane.add(jButton1);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -597,6 +608,10 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
         }
     }//GEN-LAST:event_renameGroupBtnActionPerformed
 
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton1ActionPerformed
+
     /**
     * @param args the command line arguments
     */
@@ -631,6 +646,7 @@ public class GSEViewerDialog extends javax.swing.JDialog implements SOFTViewer {
     private javax.swing.JTabbedPane gsmContentTabbedPane;
     private javax.swing.JPanel gsmInfoPane;
     private javax.swing.JButton importSampleBtn;
+    private javax.swing.JButton jButton1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;

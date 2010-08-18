@@ -17,6 +17,7 @@ package org.genmapp.expressionreader.tasks;
 
 import cytoscape.task.Task;
 import cytoscape.task.TaskMonitor;
+import cytoscape.task.ui.JTaskConfig;
 
 /**
  *
@@ -36,4 +37,6 @@ public abstract class AbstractTask implements Task {
         }
         this.taskMonitor = tm;
     }
+
+    public abstract JTaskConfig getDefaultTaskConfig();
 }

@@ -26,13 +26,23 @@
 
 package org.genmapp.expressionreader.geo.ui;
 
+import cytoscape.CyEdge;
+import cytoscape.CyNode;
+import cytoscape.Cytoscape;
+import cytoscape.data.CyAttributes;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import org.genmapp.expressionreader.commands.GEOImportCyCommandHandler;
 import org.genmapp.expressionreader.geo.GEOQuery;
+import org.genmapp.expressionreader.geo.data.DataTable;
 import org.genmapp.expressionreader.geo.data.GDS;
 import org.genmapp.expressionreader.geo.data.SOFT;
+import org.genmapp.expressionreader.tasks.GDSDataImportTask;
+import org.genmapp.expressionreader.ui.GSMImportDialog;
 
 /**
  *
@@ -58,22 +68,72 @@ public class GDSViewerDialog extends javax.swing.JDialog {
     private void initComponents() {
 
         jSplitPane1 = new javax.swing.JSplitPane();
-        softViewerPane = new org.genmapp.expressionreader.geo.ui.SOFTViewerPane();
         subsetTabbedPane = new javax.swing.JTabbedPane();
+        jPanel1 = new javax.swing.JPanel();
+        softViewerPane = new org.genmapp.expressionreader.geo.ui.SOFTViewerPane();
+        jPanel2 = new javax.swing.JPanel();
+        importBtn = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-
-        jSplitPane1.setLeftComponent(softViewerPane);
 
         subsetTabbedPane.setBorder(javax.swing.BorderFactory.createTitledBorder("Subsets"));
         subsetTabbedPane.setMinimumSize(new java.awt.Dimension(320, 420));
         subsetTabbedPane.setPreferredSize(new java.awt.Dimension(420, 420));
         jSplitPane1.setRightComponent(subsetTabbedPane);
 
+        jPanel1.setLayout(new java.awt.BorderLayout());
+        jPanel1.add(softViewerPane, java.awt.BorderLayout.CENTER);
+
+        importBtn.setText("Import Data");
+        importBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                importBtnActionPerformed(evt);
+            }
+        });
+        jPanel2.add(importBtn);
+
+        jPanel1.add(jPanel2, java.awt.BorderLayout.SOUTH);
+
+        jSplitPane1.setLeftComponent(jPanel1);
+
         getContentPane().add(jSplitPane1, java.awt.BorderLayout.CENTER);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void importBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importBtnActionPerformed
+        if (GEOImportCyCommandHandler.USE_ID_MAPPING) {
+            // create new network
+            // create a new network, and bring up CyCommand
+            CyAttributes cyattrs = Cytoscape.getNodeAttributes();
+
+            // First extract column data from datatable
+            DataTable dt = this.gds.getDataTables().getFirst(); // There should be only one datatable
+            List<String> headers = new ArrayList(dt.getHeaders().keySet());
+            Map<String, List> data = dt.getData();
+            for (int i = 0; i < headers.size() -2; i++) {
+                List<CyNode> nodes = new ArrayList<CyNode>();
+                for (Map.Entry<String, List> entry: data.entrySet()) {
+                    String probe = entry.getKey();
+                    String identifier = (String)entry.getValue().get(1);
+                    String value = (String)entry.getValue().get(i+2);
+                    CyNode node = Cytoscape.getCyNode(probe, true);
+                    cyattrs.setAttribute(probe, "other_identifier", identifier);
+                    cyattrs.setAttribute(probe, "VALUE", value);
+                    nodes.add(node);
+                }
+                Cytoscape.createNetwork(nodes, new ArrayList<CyEdge>(), headers.get(i+2));
+            }
+            
+        } else {
+            GSMImportDialog dialog = new GSMImportDialog(Cytoscape.getDesktop(), false);
+            dialog.setTask(new GDSDataImportTask(null, gds));
+            List<SOFT> list = new ArrayList<SOFT>();
+            list.add(gds);
+            dialog.setSOFTList(list);
+            dialog.setVisible(true);
+        }
+    }//GEN-LAST:event_importBtnActionPerformed
 
     /**
     * @param args the command line arguments
@@ -95,6 +155,9 @@ public class GDSViewerDialog extends javax.swing.JDialog {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton importBtn;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
     private javax.swing.JSplitPane jSplitPane1;
     private org.genmapp.expressionreader.geo.ui.SOFTViewerPane softViewerPane;
     private javax.swing.JTabbedPane subsetTabbedPane;

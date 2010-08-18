@@ -20,6 +20,7 @@
 
 package org.genmapp.expressionreader.tasks;
 
+import cytoscape.task.ui.JTaskConfig;
 import gov.nih.nlm.ncbi.soap.eutils.EUtilsService;
 import gov.nih.nlm.ncbi.soap.eutils.EUtilsServiceSoap;
 import gov.nih.nlm.ncbi.soap.eutils.esearch.ESearchRequest;
@@ -71,6 +72,11 @@ public class GEOSearchTask extends AbstractTask {
 
     public String getTitle() {
         return "Searching GEO";
+    }
+
+    @Override
+    public JTaskConfig getDefaultTaskConfig() {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
 }

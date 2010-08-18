@@ -6,6 +6,7 @@
 package org.genmapp.expressionreader.tasks;
 
 import cytoscape.task.TaskMonitor;
+import cytoscape.task.ui.JTaskConfig;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -70,6 +71,11 @@ public class AbstractTaskTest {
         }
 
         public String getTitle() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public JTaskConfig getDefaultTaskConfig() {
             throw new UnsupportedOperationException("Not supported yet.");
         }
     }

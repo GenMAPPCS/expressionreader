@@ -92,7 +92,6 @@ public class GroupPane extends javax.swing.JPanel {
         viewBtn = new javax.swing.JButton();
         closeBtn = new javax.swing.JButton();
         buttonPane2 = new javax.swing.JPanel();
-        importBtn = new javax.swing.JButton();
 
         setLayout(new java.awt.BorderLayout());
 
@@ -185,16 +184,6 @@ public class GroupPane extends javax.swing.JPanel {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.weighty = 1.0;
         buttonPane.add(buttonPane1, gridBagConstraints);
-
-        importBtn.setText("Import Group");
-        importBtn.setEnabled(false);
-        importBtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                importBtnActionPerformed(evt);
-            }
-        });
-        buttonPane2.add(importBtn);
-
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         gridBagConstraints.weightx = 1.0;
@@ -207,10 +196,6 @@ public class GroupPane extends javax.swing.JPanel {
 
         add(jSplitPane1, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
-
-    private void importBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importBtnActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_importBtnActionPerformed
 
     private void addBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addBtnActionPerformed
         String response = (String) JOptionPane.showInputDialog(null,
@@ -323,7 +308,6 @@ public class GroupPane extends javax.swing.JPanel {
     private javax.swing.JPanel buttonPane2;
     private javax.swing.JButton closeBtn;
     private javax.swing.JButton deleteBtn;
-    private javax.swing.JButton importBtn;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JScrollPane sampleScrollPane;
