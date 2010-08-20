@@ -57,8 +57,8 @@ public class GEOImportAction extends CytoscapeAction implements SOFTViewer {
     @Override
     public void actionPerformed(ActionEvent paramActionEvent) {
         String response = (String) JOptionPane.showInputDialog(Cytoscape.getDesktop(),
-                "Please enter a GEO ID or a Search Term", "Query GEO",
-                JOptionPane.PLAIN_MESSAGE, null, null, "GSM207569");
+                "<html>Please enter a GEO ID or a Search Term<br><i><font size=2>(ex: \"heat shock yeast\", \"Ideker\", \"GSM207569\")</font></i></html>", "Query GEO",
+                JOptionPane.PLAIN_MESSAGE, null, null, null);
 
         if (response != null && !"".equals(response.trim())) {
             // Download file
