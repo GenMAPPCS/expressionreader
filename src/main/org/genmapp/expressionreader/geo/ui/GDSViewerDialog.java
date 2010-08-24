@@ -102,7 +102,7 @@ public class GDSViewerDialog extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void importBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importBtnActionPerformed
-        if (GEOImportCyCommandHandler.USE_ID_MAPPING) {
+        if (GEOImportCyCommandHandler.CREATE_NETWORK_TOGGLE) {
             // create new network
             // create a new network, and bring up CyCommand
             CyAttributes cyattrs = Cytoscape.getNodeAttributes();

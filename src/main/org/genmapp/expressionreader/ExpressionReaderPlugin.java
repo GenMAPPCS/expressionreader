@@ -57,8 +57,8 @@ public class ExpressionReaderPlugin extends CytoscapePlugin {
             logger.error("Unable to initialize menus: " + e.getMessage(), e);
         }
 
-        // register CyCommand
-        CyCommandNamespace ns = CyCommandManager.reserveNamespace(GEOImportCyCommandHandler.NAMESPACE);
-        CyCommandManager.register(ns, GEOImportCyCommandHandler.COMMAND_TOGGLE, new GEOImportCyCommandHandler());
+        // CyCommands
+        new GEOImportCyCommandHandler();
+
     }
 }

@@ -127,7 +127,7 @@ public class GEOImportAction extends CytoscapeAction implements SOFTViewer {
     }
 
     public static void viewSample(List<SOFT> list) {
-        if (GEOImportCyCommandHandler.USE_ID_MAPPING) {
+        if (GEOImportCyCommandHandler.CREATE_NETWORK_TOGGLE) {
             // create new network
             // create a new network, and bring up CyCommand
             CyAttributes cyattrs = Cytoscape.getNodeAttributes();
