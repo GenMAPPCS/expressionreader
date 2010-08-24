@@ -35,8 +35,6 @@ import cytoscape.layout.Tunable;
  */
 public class GEOImportCyCommandHandler extends AbstractCommandHandler {
 
-	// implements CyCommandHandler, SOFTViewer {
-
 	public final static String NAMESPACE = "expression data reader";
 
 	public final static String CREATE_NETWORK = "create network";
