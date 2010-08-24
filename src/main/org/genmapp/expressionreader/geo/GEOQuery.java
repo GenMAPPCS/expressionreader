@@ -15,6 +15,7 @@
  ******************************************************************************/
 package org.genmapp.expressionreader.geo;
 
+import org.genmapp.expressionreader.commands.GEOImportCyCommandHandler;
 import org.genmapp.expressionreader.geo.data.SOFT;
 import org.genmapp.expressionreader.geo.parser.SOFTParser;
 import java.io.BufferedInputStream;
@@ -285,6 +286,7 @@ public class GEOQuery {
             return getGSE(geoId, format);
         } else {
             File tmpFile = new File(tmpDir, geoId + '-' + format + ".txt");
+            GEOImportCyCommandHandler.IMPORT_SOURCE_URL = tmpFile.getAbsolutePath();
             boolean result = true;
             String urlStr = null;
             if (!tmpFile.exists()) {
